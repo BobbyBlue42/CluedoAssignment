@@ -3,6 +3,8 @@ package cluedo.game;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import cluedo.ui.UI;
+
 public class Room {
 	public enum RoomName {
 		KITCHEN,
@@ -132,7 +134,7 @@ public class Room {
 		return false;
 	}
 
-	public Point getExitPoint(Board.Direction d) {
+	public Point getExitPoint(Board.Direction d, UI ui) {
 		ArrayList<Point> exits = new ArrayList<Point>();
 		switch (d) {
 		case UP:
@@ -157,7 +159,15 @@ public class Room {
 		}
 		
 		if (exits.size() > 1) {
-			// TODO: ask user which exit he wants - use UI for this
+			String question = "There are multiple exits in this direction.\nWould you like to use the exit leading to:";
+			for (int i = 0; i < exits.size(); i++) {
+				question += "\n\t"+(i+1)+"\t("+exits.get(i).getX()+","+exits.get(i).getY()+")";
+			}
+			question += "?\n(Please enter the number of your answer.)";
+			
+			int ans = ui.askInt(question);
+			
+			return exits.get(ans-1);
 		} else if (exits.size() == 1) {
 			return exits.get(0);
 		}
