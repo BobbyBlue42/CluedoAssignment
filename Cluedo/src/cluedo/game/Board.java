@@ -147,22 +147,33 @@ public class Board {
 		return rand.nextInt(5) + 1;
 	}
 	
-	public void move(Character c, Direction d) {
+	public boolean move(Character c, Direction d) {
 		if (c != null) {
 			int row = c.getRow();
 			int col = c.getCol();
 			
 			if (d.equals(Direction.UP)) {
-				if (grid[row][col] == 1 && grid[row-1][col] == 1) {
+				if (grid[row][col] == 1 
+						&& grid[row-1][col] == 1
+						&& playerGrid[row-1][col] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row-1][col] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d);
-						playerGrid[(int) exit.getX()][(int) exit.getY()] = c.name().ordinal();
+						Point exit = r.getExitPoint(d, ui);
+						int exitRow = (int) exit.getX();
+						int exitCol = (int) exit.getY();
+						if (playerGrid[exitRow][exitCol] == 0) {
+							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							return true;
+						} else {
+							ui.print("Sorry, there is already a character standing in that spot.");
+							return false;
+						}
 					}
 				} else if (grid[row-1][col] != 1) {
 					// trying to enter a room
@@ -170,19 +181,31 @@ public class Board {
 					if (r.canEnter(row, col, row-1, col)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
+						return true;
 					}
 				}
 			} else if (d.equals(Direction.DOWN)) {
-				if (grid[row][col] == 1 && grid[row+1][col] == 1) {
+				if (grid[row][col] == 1 
+						&& grid[row+1][col] == 1
+						&& playerGrid[row+1][col] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row+1][col] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d);
-						playerGrid[(int) exit.getX()][(int) exit.getY()] = c.name().ordinal();
+						Point exit = r.getExitPoint(d, ui);
+						int exitRow = (int) exit.getX();
+						int exitCol = (int) exit.getY();
+						if (playerGrid[exitRow][exitCol] == 0) {
+							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							return true;
+						} else {
+							ui.print("Sorry, there is already a character standing in that spot.");
+							return false;
+						}
 					}
 				} else if (grid[row+1][col] != 1) {
 					// trying to enter a room
@@ -190,19 +213,31 @@ public class Board {
 					if (r.canEnter(row, col, row+1, col)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
+						return true;
 					}
 				}
 			} else if (d.equals(Direction.LEFT)) {
-				if (grid[row][col] == 1 && grid[row][col-1] == 1) {
+				if (grid[row][col] == 1 
+						&& grid[row][col-1] == 1
+						&& playerGrid[row][col-1] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row][col-1] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d);
-						playerGrid[(int) exit.getX()][(int) exit.getY()] = c.name().ordinal();
+						Point exit = r.getExitPoint(d, ui);
+						int exitRow = (int) exit.getX();
+						int exitCol = (int) exit.getY();
+						if (playerGrid[exitRow][exitCol] == 0) {
+							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							return true;
+						} else {
+							ui.print("Sorry, there is already a character standing in that spot.");
+							return false;
+						}
 					}
 				} else if (grid[row][col-1] != 1) {
 					// trying to enter a room
@@ -210,19 +245,31 @@ public class Board {
 					if (r.canEnter(row, col, row, col-1)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
+						return true;
 					}
 				}
 			} else if (d.equals(Direction.RIGHT)) {
-				if (grid[row][col] == 1 && grid[row][col+1] == 1) {
+				if (grid[row][col] == 1 
+						&& grid[row][col+1] == 1
+						&& playerGrid[row][col+1] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row][col+1] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d);
-						playerGrid[(int) exit.getX()][(int) exit.getY()] = c.name().ordinal();
+						Point exit = r.getExitPoint(d, ui);
+						int exitRow = (int) exit.getX();
+						int exitCol = (int) exit.getY();
+						if (playerGrid[exitRow][exitCol] == 0) {
+							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							return true;
+						} else {
+							ui.print("Sorry, there is already a character standing in that spot.");
+							return false;
+						}
 					}
 				} else if (grid[row][col+1] != 0) {
 					// trying to enter a room
@@ -230,12 +277,17 @@ public class Board {
 					if (r.canEnter(row, col, row, col+1)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
+						return true;
 					}
 				}
 			}
 			
-			// TODO: Print error message - use UI for this
+			ui.print("Sorry, the move you requested is invalid. Please try a different move.");
+			return false;
 		}
+		
+		ui.print("Sorry, there was an error (character was null).");
+		return false;
 	}
 	
 	public void run() {
@@ -269,7 +321,11 @@ public class Board {
 			charIndices.add(character);
 			
 			p.chooseCharacter(characters.get(character));
+			
+			players.add(p);
 		}
+		
+		
 		
 		/*while (!gameOver) {
 			for (Player p : players) {
