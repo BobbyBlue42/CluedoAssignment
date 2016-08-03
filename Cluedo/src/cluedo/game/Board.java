@@ -20,6 +20,8 @@ public class Board {
 	private ArrayList<Room> rooms;
 	private ArrayList<Weapon> weapons;
 	private ArrayList<Card> pack;
+	private ArrayList<Card> envelope;
+	private ArrayList<Card> faceUpCards;
 	
 	private UI ui;
 	
@@ -109,6 +111,7 @@ public class Board {
 	
 	private void setupPack() {
 		pack = new ArrayList<Card>();
+		envelope = new ArrayList<Card>(3);
 		
 		int murderChar = rand.nextInt(characters.size());
 		int murderWeapon = rand.nextInt(weapons.size());
@@ -116,14 +119,20 @@ public class Board {
 		
 		for (int i = 0; i < characters.size(); i++) {
 			pack.add(new CharacterCard(characters.get(i), i == murderChar));
+			if (i == murderChar)
+				envelope.add(pack.get(pack.size()-1));
 		}
 		
 		for (int i = 0; i < weapons.size(); i++) {
 			pack.add(new WeaponCard(weapons.get(i), i == murderWeapon));
+			if (i == murderWeapon)
+				envelope.add(pack.get(pack.size()-1));
 		}
 		
 		for (int i = 0; i < rooms.size(); i++) {
 			pack.add(new RoomCard(rooms.get(i), i == murderRoom));
+			if (i == murderRoom)
+				envelope.add(pack.get(pack.size()-1));
 		}
 	}
 
@@ -291,8 +300,33 @@ public class Board {
 	}
 	
 	public void run() {
+		// Welcome players
 		ui.print("Welcome to Cluedo, the Great Detective Game!");
-		int people = ui.askInt("How many people will be playing?");
+		// Allow players to choose their characters
+		chooseCharacters(ui.askInt("How many people will be playing?"));
+		// Deal non-murder-component cards to players
+		dealCards();
+		// TODO: set out the weapons
+		
+		while (!gameOver) {
+			for (Player p : players) {
+				if (!p.isAlive())	// if player has made a false accusation
+					continue;		// skip them because they are out of the game
+				
+				int dieRoll = rand.nextInt(5) + 1;
+				// TODO: display 'you have rolled' + player's name
+				
+				ui.print("You have rolled a "+dieRoll+"!");
+				
+				while (dieRoll > 0) {
+					ui.displayBoard();
+					ui.print("You have "+dieRoll+" more moves remaining.");
+				}
+			}
+		}
+	}
+	
+	private void chooseCharacters(int people) {
 		while (people > 6 || people < 3) {
 			ui.print("Please enter a number between 3 and 6 (inclusive).");
 			people = ui.askInt("How many people will be playing?");
@@ -324,14 +358,30 @@ public class Board {
 			
 			players.add(p);
 		}
+	}
+	
+	private void dealCards() {
+		ArrayList<Card> cards = new ArrayList<Card>(18);
 		
-		
-		
-		/*while (!gameOver) {
-			for (Player p : players) {
-				
+		for (Card c : pack) {
+			if (!c.isMurderComponent()) {
+				cards.add(c);
 			}
-		}*/
+		}
+		
+		while (cards.size() >= players.size()) {
+			for (Player p : players) {
+				Card c = cards.remove(rand.nextInt(cards.size()));
+				p.deal(c);
+				c.dealTo(p);
+			}
+		}
+		
+		// lay any remaining cards face-up on the table
+		faceUpCards = new ArrayList<Card>();
+		for (Card c : cards) {
+			faceUpCards.add(c);
+		}
 	}
 	
 	private void setupGrids() {

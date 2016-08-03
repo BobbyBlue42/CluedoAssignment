@@ -6,6 +6,7 @@ public class Player {
 	private String name;
 	private ArrayList<Card> hand;
 	private Character character;
+	private boolean isAlive = true;
 	
 	public Player(String name) {
 		this.name = name;
@@ -26,6 +27,14 @@ public class Player {
 	
 	public boolean isHolding(Card c) {
 		return hand.contains(c);
+	}
+	
+	public boolean isAlive() {
+		return isAlive;
+	}
+	
+	public void die() {
+		isAlive = false;
 	}
 	
 	public String name() {
