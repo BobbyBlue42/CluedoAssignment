@@ -81,10 +81,29 @@ public class Board {
 	
 	private void setupRooms() {
 		rooms = new ArrayList<Room>();
+		Room kitchen = null, study = null, lounge = null, conservatory = null;
 		
 		for (Room.RoomName name : Room.RoomName.values()) {
 			rooms.add(new Room(name));
+			switch (name) {
+			case KITCHEN:
+				kitchen = rooms.get(rooms.size()-1);
+				break;
+			case STUDY:
+				study = rooms.get(rooms.size()-1);
+				break;
+			case LOUNGE:
+				lounge = rooms.get(rooms.size()-1);
+				break;
+			case CONSERVATORY:
+				conservatory = rooms.get(rooms.size()-1);
+			}
 		}
+		
+		kitchen.connectTo(study);
+		study.connectTo(kitchen);
+		lounge.connectTo(conservatory);
+		conservatory.connectTo(lounge);
 	}
 	
 	private void setupWeapons() {
@@ -156,7 +175,7 @@ public class Board {
 		return rand.nextInt(5) + 1;
 	}
 	
-	public boolean move(Character c, Direction d) {
+	public boolean move(Character c, Direction d, Room origin) {
 		if (c != null) {
 			int row = c.getRow();
 			int col = c.getCol();
@@ -177,7 +196,8 @@ public class Board {
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							c.leaveRoom();
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -187,6 +207,10 @@ public class Board {
 				} else if (grid[row-1][col] != 1) {
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row-1][col]);
+					if (r.equals(origin)) {
+						ui.print("Sorry, you cannot re-enter a room you left this turn.");
+						return false;
+					}
 					if (r.canEnter(row, col, row-1, col)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
@@ -209,7 +233,8 @@ public class Board {
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							c.leaveRoom();
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -219,6 +244,10 @@ public class Board {
 				} else if (grid[row+1][col] != 1) {
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row+1][col]);
+					if (r.equals(origin)) {
+						ui.print("Sorry, you cannot re-enter a room you left this turn.");
+						return false;
+					}
 					if (r.canEnter(row, col, row+1, col)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
@@ -241,7 +270,8 @@ public class Board {
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							c.leaveRoom();
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -251,6 +281,10 @@ public class Board {
 				} else if (grid[row][col-1] != 1) {
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row][col-1]);
+					if (r.equals(origin)) {
+						ui.print("Sorry, you cannot re-enter a room you left this turn.");
+						return false;
+					}
 					if (r.canEnter(row, col, row, col-1)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
@@ -273,7 +307,8 @@ public class Board {
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal();
+							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							c.leaveRoom();
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -283,6 +318,10 @@ public class Board {
 				} else if (grid[row][col+1] != 0) {
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row][col+1]);
+					if (r.equals(origin)) {
+						ui.print("Sorry, you cannot re-enter a room you left this turn.");
+						return false;
+					}
 					if (r.canEnter(row, col, row, col+1)) {
 						r.addCharacter(c);
 						c.enterRoom(r);
@@ -306,7 +345,8 @@ public class Board {
 		chooseCharacters(ui.askInt("How many people will be playing?"));
 		// Deal non-murder-component cards to players
 		dealCards();
-		// TODO: set out the weapons
+		// Put the weapons in rooms, maximum one at a time
+		setOutWeapons();
 		
 		while (!gameOver) {
 			for (Player p : players) {
@@ -314,14 +354,112 @@ public class Board {
 					continue;		// skip them because they are out of the game
 				
 				int dieRoll = rand.nextInt(5) + 1;
-				// TODO: display 'you have rolled' + player's name
+				boolean hasHypothesised = false;
 				
+				ui.displayBoard();
 				ui.print("You have rolled a "+dieRoll+"!");
 				
-				while (dieRoll > 0) {
+				Room startingRoom = p.character().location();
+				
+				String question = "What would you like to do? (Some options may be unavailable)";
+				question += "\n\t1\tMove";
+				question += "\n\t2\tMake hypothesis";
+				question += "\n\t3\tMake accusation";
+				question += "\n\t4\tLook at your cards";
+				
+				if (startingRoom.hasConnection() && startingRoom.equals(p.character().location()))
+					question += "\n\t5\tTake the secret stairs";
+				
+				question += "\n(Please enter the number of the option you wish to select)";
+				
+				int choice = ui.askInt(question);
+				
+				if (choice == 1) {
+					// Move
+					// Valid checking will be done by the move method
+					question = "Which direction would you like to move in?";
+					question += "\n\t1\tUp";
+					question += "\n\t2\tRight";
+					question += "\n\t3\tDown";
+					question += "\n\t4\tLeft";
+					question += "\n(Please enter the number of the option you wish to select)";
+					
+					int moveDir = ui.askInt(question);
+					
+					boolean moved = false;
+					
+					if (moveDir == 1) {
+						moved = move(p.character(), Direction.UP, startingRoom);
+					} else if (moveDir == 2) {
+						moved = move(p.character(), Direction.RIGHT, startingRoom);
+					} else if (moveDir == 3) {
+						moved = move(p.character(), Direction.DOWN, startingRoom);
+					} else if (moveDir == 4) {
+						moved = move(p.character(), Direction.LEFT, startingRoom);
+					} else {
+						ui.print("Sorry, that was not a valid direction.");
+					}
+					
+					dieRoll -= moved ? 1 : 0;
+					
+					// if player has entered a room, their turn is over (except for a hypothesis)
+					if (p.character().location() != null && !p.character().location().equals(startingRoom)) {
+						dieRoll = 0;
+					}
+				} else if (choice == 2) {
+					// hypothesis
+					if (p.character().location() == null) {
+						ui.print("Sorry, you cannot hypothesise if you are not inside a room.");
+					} else {
+						Room room = p.character().location();
+						question = "You are hypothesising about a murder which may have happened in the " + room.name().toString();
+						question += "\nWhich character do you think may have commited the murder?";
+						for (Character c : characters) {
+							question += "\n\t" + (c.name().ordinal() + 1) + "\t" + c.name().toString();
+						}
+						question += "\n(Please enter the number of the option you wish to select)";
+						
+						int charAns = ui.askInt(question);
+						Character character = null;
+						
+						for (Character c : characters) {
+							if (c.name().ordinal()-1 == charAns)
+								character = c;
+						}
+						
+						if (character == null) {
+							ui.print("Sorry, your answer is not a valid character");
+						} else {
+							question = "You are hypothesising about a murder which "+character.name().toString()
+									+" may have commited in the "+room.name().toString();
+							question += "\nWhich weapon do you think they may have used?";
+							for (Weapon w : weapons) {
+								question += "\n\t" + (w.name().ordinal() + 1) + "\t" + w.name().toString();
+							}
+							question += "\n(Please enter the number of the option you wish to select)";
+							
+							int weapAns = ui.askInt(question);
+							Weapon weapon = null;
+							
+							for (Weapon w : weapons) {
+								if (w.name().ordinal()-1 == weapAns)
+									weapon = w;
+							}
+							
+							if (weapon == null) {
+								ui.print("Sorry, your answer is not a valid weapon");
+							} else {
+								hypothesise(room, character, weapon);
+							}
+						}
+					}
+				}
+				
+				/* TODO: put ^ into loop
+				 * while (dieRoll > 0) {
 					ui.displayBoard();
 					ui.print("You have "+dieRoll+" more moves remaining.");
-				}
+				}*/
 			}
 		}
 	}
@@ -384,6 +522,24 @@ public class Board {
 		}
 	}
 	
+	private void setOutWeapons() {
+		ArrayList<Room> roomList = new ArrayList<Room>();
+		for (Room r : rooms) {
+			roomList.add(r);
+		}
+		
+		for (Weapon w : weapons) {
+			int room = rand.nextInt(roomList.size());
+			Room r = roomList.remove(room);
+			r.addWeapon(w);
+			w.moveToRoom(r);
+		}
+	}
+	
+	private void hypothesise(Room r, Character c, Weapon w) {
+		// TODO: loop players other than current player (in order) to allow them to dispute
+	}
+	
 	private void setupGrids() {
 		int[][] boardArr = {
 				{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -418,7 +574,7 @@ public class Board {
 		
 		int[][] charArr = new int[26][24];
 		
-		// note: these values are the same as the ordinal value of the respective character's name
+		// note: these values are the same as the ordinal value (+1) of the respective character's name
 		charArr[25][7] = 1;		// Miss Scarlett
 		charArr[20][23] = 2;	// Professor Plum
 		charArr[7][23] = 3;		// Mrs. Peacock

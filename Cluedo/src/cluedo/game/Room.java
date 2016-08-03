@@ -40,6 +40,7 @@ public class Room {
 	private RoomName name;
 	private ArrayList<Character> characters;
 	private ArrayList<Weapon> weapons;
+	private Room connection;
 	
 	private int row, col;
 	private int charRow, charCol;
@@ -80,6 +81,18 @@ public class Room {
 	
 	public Weapon[] weapons() {
 		return (Weapon[]) weapons.toArray();
+	}
+	
+	public void connectTo(Room other) {
+		connection = other;
+	}
+	
+	public boolean hasConnection() {
+		return connection != null;
+	}
+	
+	public Room connection() {
+		return connection;
 	}
 	
 	public boolean canEnter(int fromRow, int fromCol, int toRow, int toCol) {
