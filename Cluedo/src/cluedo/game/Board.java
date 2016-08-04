@@ -100,6 +100,11 @@ public class Board {
 			}
 		}
 		
+		// should not technically need this,
+		// but my laptop would not compile without it for some reason
+		if (kitchen == null || study == null || lounge == null || conservatory == null)
+			throw new RuntimeException("The linked rooms shouldn't be null at this point.");
+		
 		kitchen.connectTo(study);
 		study.connectTo(kitchen);
 		lounge.connectTo(conservatory);
@@ -353,6 +358,8 @@ public class Board {
 				if (!p.isAlive())	// if player has made a false accusation
 					continue;		// skip them because they are out of the game
 				
+				currentPlayer = p;
+				
 				int dieRoll = rand.nextInt(5) + 1;
 				boolean hasHypothesised = false;
 				
@@ -362,29 +369,30 @@ public class Board {
 				Room startingRoom = p.character().location();
 				
 				String question = "What would you like to do? (Some options may be unavailable)";
-				question += "\n\t1\tMove";
-				question += "\n\t2\tMake hypothesis";
-				question += "\n\t3\tMake accusation";
-				question += "\n\t4\tLook at your cards";
+				String[] options = new String[4];
 				
-				if (startingRoom.hasConnection() && startingRoom.equals(p.character().location()))
-					question += "\n\t5\tTake the secret stairs";
+				if (startingRoom.hasConnection() && startingRoom.equals(p.character().location())) {
+					options = new String[5];
+					options[4] = "Take the secret stairs";
+				}
+				options[0] = "Move";
+				options[1] = "Make hypothesis";
+				options[2] = "Make accusation";
+				options[3] = "Look at your cards";
 				
-				question += "\n(Please enter the number of the option you wish to select)";
-				
-				int choice = ui.askInt(question);
+				int choice = ui.askOpt(question, options);
 				
 				if (choice == 1) {
 					// Move
 					// Valid checking will be done by the move method
 					question = "Which direction would you like to move in?";
-					question += "\n\t1\tUp";
-					question += "\n\t2\tRight";
-					question += "\n\t3\tDown";
-					question += "\n\t4\tLeft";
-					question += "\n(Please enter the number of the option you wish to select)";
+					options = new String[4];
+					options[0] = "Up";
+					options[1] = "Right";
+					options[2] = "Down";
+					options[3] = "Left";
 					
-					int moveDir = ui.askInt(question);
+					int moveDir = ui.askOpt(question, options);
 					
 					boolean moved = false;
 					
@@ -414,45 +422,91 @@ public class Board {
 						Room room = p.character().location();
 						question = "You are hypothesising about a murder which may have happened in the " + room.name().toString();
 						question += "\nWhich character do you think may have commited the murder?";
-						for (Character c : characters) {
-							question += "\n\t" + (c.name().ordinal() + 1) + "\t" + c.name().toString();
-						}
-						question += "\n(Please enter the number of the option you wish to select)";
 						
-						int charAns = ui.askInt(question);
-						Character character = null;
-						
-						for (Character c : characters) {
-							if (c.name().ordinal()-1 == charAns)
-								character = c;
+						options = new String[characters.size()];
+						for (int i = 0; i < characters.size(); i++) {
+							options[i] = characters.get(i).name().toString();
 						}
 						
-						if (character == null) {
-							ui.print("Sorry, your answer is not a valid character");
-						} else {
-							question = "You are hypothesising about a murder which "+character.name().toString()
-									+" may have commited in the "+room.name().toString();
-							question += "\nWhich weapon do you think they may have used?";
-							for (Weapon w : weapons) {
-								question += "\n\t" + (w.name().ordinal() + 1) + "\t" + w.name().toString();
-							}
-							question += "\n(Please enter the number of the option you wish to select)";
-							
-							int weapAns = ui.askInt(question);
-							Weapon weapon = null;
-							
-							for (Weapon w : weapons) {
-								if (w.name().ordinal()-1 == weapAns)
-									weapon = w;
-							}
-							
-							if (weapon == null) {
-								ui.print("Sorry, your answer is not a valid weapon");
-							} else {
-								hypothesise(room, character, weapon);
-							}
+						int charAns = ui.askOpt(question, options);
+						Character character = characters.get(charAns-1);
+						
+						question = "You are hypothesising about a murder which "+character.name().toString()
+								+" may have commited in the "+room.name().toString();
+						question += "\nWhich weapon do you think they may have used?";
+						
+						options = new String[weapons.size()];
+						for (int i = 0; i < weapons.size(); i++) {
+							options[i] = weapons.get(i).name().toString();
 						}
+						
+						int weapAns = ui.askOpt(question, options);
+						Weapon weapon = weapons.get(weapAns-1);
+						
+						if (!room.equals(character.location())) {
+							character.location().removeCharacter(character);
+							room.addCharacter(character);
+							character.enterRoom(room);
+						}
+						if (!room.equals(weapon.location())) {
+							weapon.location().removeWeapon(weapon);
+							room.addWeapon(weapon);
+							weapon.moveToRoom(room);
+						}
+						
+						hypothesise(room, character, weapon);
+						
+						// just to make sure - shouldn't be over 0 at this point anyway
+						dieRoll = 0;
 					}
+				} else if (choice == 3) {
+					// accusation
+					question = "Which room do you think the murder happened in?";
+					options = new String[rooms.size()];
+					for (int i = 0; i < rooms.size(); i++) {
+						options[i] = rooms.get(i).name().toString();
+					}
+					
+					int roomNo = ui.askOpt(question, options);
+					Room room = rooms.get(roomNo-1);
+					
+					question = "Which character do you think commited the murder?";
+					options = new String[characters.size()];
+					for (int i = 0; i < characters.size(); i++) {
+						options[i] = characters.get(i).name().toString();
+					}
+					
+					int charNo = ui.askOpt(question, options);
+					Character character = characters.get(charNo-1);
+					
+					question = "What weapon do you think they commited the murder with?";
+					options = new String[weapons.size()];
+					for (int i = 0; i < weapons.size(); i++) {
+						options[i] = weapons.get(i).name().toString();
+					}
+					
+					int weapNo = ui.askOpt(question, options);
+					Weapon weapon = weapons.get(weapNo-1);
+					
+					ui.print("You have accused "+character.name().toString()+" of commiting the murder "
+							+"in the "+room.name().toString()+" with the "+weapon.name().toString());
+					ui.print("All other players, you have 2 seconds to please look away from the screen.");
+					// TODO: kill off this player if they're wrong, make them win the game if they are right
+					long startTime = System.currentTimeMillis();
+					while (System.currentTimeMillis() < startTime+2000);
+					boolean allRight = true;
+					ui.print("You guessed that the murder happened in the "+room.name().toString());
+					startTime = System.currentTimeMillis();
+					while (System.currentTimeMillis() < startTime+500);
+					// TODO: display guesses/correctness - use the envelope for this
+				} else if (choice == 4) {
+					lookAtCards(p);
+				} else if (choice == 5) {
+					Room endRoom = startingRoom.connection();
+					startingRoom.removeCharacter(p.character());
+					endRoom.addCharacter(p.character());
+					p.character().enterRoom(endRoom);
+					dieRoll = 0;
 				}
 				
 				/* TODO: put ^ into loop
@@ -537,7 +591,166 @@ public class Board {
 	}
 	
 	private void hypothesise(Room r, Character c, Weapon w) {
-		// TODO: loop players other than current player (in order) to allow them to dispute
+		boolean foundCurPlayer = false;
+		for (int i = 0; i < players.size(); i++) {
+			Player p = players.get(i);
+			if (!foundCurPlayer) {
+				if (p.equals(currentPlayer))
+					foundCurPlayer = true;
+			} else {
+				ui.print("Asking "+p.name()+" about their cards. Please hand the controls over to them for now.");
+				boolean lookAtCards = ui.askBool("Would you like to look at your cards before answering?");
+				
+				if (lookAtCards) {
+					lookAtCards(p);
+				}
+				
+				while (true) {
+					String question = "Would you like to dispute any of this hypothesised murder's components?";
+					String[] options = {
+							r.name().toString(),
+							c.name().toString(),
+							w.name().toString(),
+							"None"
+					};
+					
+					int choice = ui.askOpt(question, options);
+					
+					if (choice == 1) {
+						// disputing room
+						for (Card card : p.hand())
+							if (card.name().equals(r.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else if (choice == 2) {
+						// disputing character
+						for (Card card : p.hand())
+							if (card.name().equals(c.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else if (choice == 3) {
+						// disputing weapon
+						for (Card card : p.hand())
+							if (card.name().equals(w.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else {
+						// claiming they cannot dispute
+						boolean found = false;
+						for (Card card : p.hand())
+							if (card.name().equals(r.name().toString())
+									|| card.name().equals(c.name().toString())
+									|| card.name().equals(w.name().toString())) {
+								ui.print("If you have one of the cards corresponding to a hypothesis in your hand, you *must* dispute "
+										+"the hypothesis.");
+								found = true;
+								break;
+							}
+						if (found) continue;
+						else break;
+					}
+				}
+			}
+		}
+		
+		for (int i = 0; i < players.size(); i++) {
+			Player p = players.get(i);
+			if (p.equals(currentPlayer)) {
+				return;
+			} else {
+				ui.print("Asking "+p.name()+" about their cards. Please hand the controls over to them for now.");
+				boolean lookAtCards = ui.askBool("Would you like to look at your cards before answering?");
+				
+				if (lookAtCards) {
+					lookAtCards(p);
+				}
+				
+				while (true) {
+					String question = "Would you like to dispute any of this hypothesised murder's components?";
+					String[] options = {
+							r.name().toString(),
+							c.name().toString(),
+							w.name().toString(),
+							"None"
+					};
+					
+					int choice = ui.askOpt(question, options);
+					
+					if (choice == 1) {
+						// disputing room
+						for (Card card : p.hand())
+							if (card.name().equals(r.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else if (choice == 2) {
+						// disputing character
+						for (Card card : p.hand())
+							if (card.name().equals(c.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else if (choice == 3) {
+						// disputing weapon
+						for (Card card : p.hand())
+							if (card.name().equals(w.name().toString())) {
+								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
+										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+"the "+card.name()+" card.");
+								return;
+							}
+						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
+					} else {
+						// claiming they cannot dispute
+						boolean found = false;
+						for (Card card : p.hand())
+							if (card.name().equals(r.name().toString())
+									|| card.name().equals(c.name().toString())
+									|| card.name().equals(w.name().toString())) {
+								ui.print("If you have one of the cards corresponding to a hypothesis in your hand, you *must* dispute "
+										+"the hypothesis.");
+								found = true;
+								break;
+							}
+						if (found) continue;
+						else break;
+					}
+				}
+			}
+		}
+	}
+	
+	private void lookAtCards(Player p) {
+		ui.print("You have 2 seconds to make sure nobody is looking at the screen while you check your cards.");
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() < start + 2000);	// will hopefully just 'sleep' until the time is uip
+		ui.print("Your hand:");
+		for (Card card : p.hand()) {
+			ui.print("\t"+card.name());
+		}
+		boolean looking = true;
+		while (looking)
+			looking = !ui.askBool("Are you done looking at your cards?");
+		
+		ui.clear();
 	}
 	
 	private void setupGrids() {

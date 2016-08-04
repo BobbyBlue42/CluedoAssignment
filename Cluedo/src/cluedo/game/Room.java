@@ -63,16 +63,24 @@ public class Room {
 		characters.add(c);
 	}
 	
+	public void removeCharacter(Character c) {
+		characters.remove(c);
+	}
+	
 	public boolean containsCharacter(Character c) {
 		return characters.contains(c);
 	}
 	
 	public Character[] characters() {
-		return (Character[]) characters.toArray();
+		return characters.toArray(new Character[characters.size()]);
 	}
 	
 	public void addWeapon(Weapon w) {
 		weapons.add(w);
+	}
+	
+	public void removeWeapon(Weapon w) {
+		weapons.remove(w);
 	}
 	
 	public boolean containsWeapon(Weapon w) {
@@ -80,7 +88,7 @@ public class Room {
 	}
 	
 	public Weapon[] weapons() {
-		return (Weapon[]) weapons.toArray();
+		return weapons.toArray(new Weapon[weapons.size()]);
 	}
 	
 	public void connectTo(Room other) {
@@ -209,13 +217,13 @@ public class Room {
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
 				if (charCount == charCol+i) {
-					characters.get(i).name().toChar();
+					return characters.get(i).name().toChar();
 				}
 			}
 		} else if (row == wepRow) {
 			for (int i = 0; i < weapons.size(); i++) {
 				if (charCount == wepCol+i) {
-					weapons.get(i).name().toChar();
+					return weapons.get(i).name().toChar();
 				}
 			}
 		}

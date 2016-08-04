@@ -29,6 +29,10 @@ public class Player {
 		return hand.contains(c);
 	}
 	
+	public Card[] hand() {
+		return hand.toArray(new Card[hand.size()]);
+	}
+	
 	public boolean isAlive() {
 		return isAlive;
 	}

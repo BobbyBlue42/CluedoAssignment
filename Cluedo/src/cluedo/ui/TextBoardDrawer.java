@@ -9,6 +9,7 @@ public class TextBoardDrawer {
 		int[][] board = b.getGrid();
 		int[][] players = b.getPlayerGrid();
 		char[][] names = b.getRoomNameGrid();
+		// TODO display face-up cards
 		
 		Player p = b.getCurrentPlayer();
 		
@@ -197,8 +198,10 @@ public class TextBoardDrawer {
 	
 	public static void main(String[] args) {
 		// for testing purposes
-		
-		Board b = new Board();
-		TextBoardDrawer.drawBoard(b);
+		//Board b = new Board();
+		//TextBoardDrawer.drawBoard(b);
+		System.out.println("Hello World Foo Bar Bang");
+		for (int i = 0; i < 10; i++)
+			System.out.print("\b ");
 	}
 }
