@@ -16,6 +16,10 @@ public class TextBoardDrawer {
 		ArrayList<Card> faceUp = b.getFaceUpCards();
 		
 		Player p = b.getCurrentPlayer();
+
+		System.out.println("===================================================");
+		System.out.println("===================================================");
+		System.out.println();
 		
 		if (p != null) {
 			System.out.println("Current player: "+p.name()+" ("+p.character().name()+")\n");
@@ -207,9 +211,9 @@ public class TextBoardDrawer {
 			for (Card c : faceUp) {
 				System.out.println(c.name());
 			}
-			System.out.println();
 		}
-		
+
+		System.out.println();
 		System.out.println("------------------------------------------------------------------------------");
 	}
 	

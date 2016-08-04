@@ -608,7 +608,7 @@ public class Board {
 	}
 	
 	private void setupPlayers(int people) {
-		while (people > 6 || people < 1) {
+		while (people > 6 || people < 3) {
 			ui.print("Please enter a number between 3 and 6 (inclusive).");
 			people = ui.askInt("How many people will be playing?");
 		}
