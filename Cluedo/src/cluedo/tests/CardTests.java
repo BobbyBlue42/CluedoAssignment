@@ -88,7 +88,7 @@ public class CardTests {
 		Character.CharacterName m = Character.CharacterName.COLONEL_MUSTARD;
 		ch1 = new Character(m, m.getRow(), m.getCol());
 		ch1.assignTo(p1);
-		Character.CharacterName s = Character.CharacterName.MISS_SCARLET;
+		Character.CharacterName s = Character.CharacterName.MISS_SCARLETT;
 		ch2 = new Character(s, s.getRow(), s.getCol());
 		ch2.assignTo(p2);
 		

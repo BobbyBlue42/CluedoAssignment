@@ -4,24 +4,20 @@ import java.awt.Point;
 
 public class Character {
 	public enum CharacterName {
-		MISS_SCARLET('1', 25, 7),
-		PROFESSOR_PLUM('2', 20, 23),
-		MRS_PEACOCK('3', 7, 23),
-		MRS_WHITE('4', 1, 14),
-		REVEREND_GREEN('5', 1, 9),
-		COLONEL_MUSTARD('6', 18, 0);
+		MISS_SCARLETT(25, 7),
+		PROFESSOR_PLUM(20, 23),
+		MRS_PEACOCK(7, 23),
+		MRS_WHITE(1, 14),
+		REVEREND_GREEN(1, 9),
+		COLONEL_MUSTARD(18, 0);
 		
 		private char c;
 		private int startRow, startCol;
 		
-		private CharacterName(char c, int startRow, int startCol) {
+		private CharacterName(int startRow, int startCol) {
 			this.c = c;
 			this.startRow = startRow;
 			this.startCol = startCol;
-		}
-		
-		public char toChar() {
-			return c;
 		}
 		
 		public int getRow() {
@@ -91,7 +87,15 @@ public class Character {
 		return row;
 	}
 	
+	public void setRow(int row) {
+		this.row = row;
+	}
+	
 	public int getCol() {
 		return col;
+	}
+	
+	public void setCol(int col) {
+		this.col = col;
 	}
 }

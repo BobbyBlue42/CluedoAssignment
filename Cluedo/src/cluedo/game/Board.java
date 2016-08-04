@@ -59,16 +59,16 @@ public class Board {
 		players = new ArrayList<Player>();
 		rand = new Random(System.currentTimeMillis());
 		
-		// TODO: initialise UI (or potentially add as argument)
-		
 		setupChars();
 		setupRooms();
 		setupWeapons();
 		setupPack();
 		
 		setupGrids();
-		
-		run();
+	}
+	
+	public void setUI(UI ui) {
+		this.ui = ui;
 	}
 	
 	private void setupChars() {
@@ -186,12 +186,18 @@ public class Board {
 			int col = c.getCol();
 			
 			if (d.equals(Direction.UP)) {
+				if (row == 0) {
+					// trying to move out of the array
+					ui.print("Sorry, you cannot move in that direction");
+					return false;
+				}
 				if (grid[row][col] == 1 
 						&& grid[row-1][col] == 1
 						&& playerGrid[row-1][col] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row-1][col] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					c.setRow(row-1);
 					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
@@ -203,6 +209,8 @@ public class Board {
 						if (playerGrid[exitRow][exitCol] == 0) {
 							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
 							c.leaveRoom();
+							c.setRow(exitRow);
+							c.setCol(exitCol);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -217,18 +225,25 @@ public class Board {
 						return false;
 					}
 					if (r.canEnter(row, col, row-1, col)) {
+						playerGrid[row][col] = 0;
 						r.addCharacter(c);
 						c.enterRoom(r);
 						return true;
 					}
 				}
 			} else if (d.equals(Direction.DOWN)) {
+				if (row == grid.length-1) {
+					// trying to move out of the array
+					ui.print("Sorry, you cannot move in that direction");
+					return false;
+				}
 				if (grid[row][col] == 1 
 						&& grid[row+1][col] == 1
 						&& playerGrid[row+1][col] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row+1][col] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					c.setRow(row+1);
 					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
@@ -240,6 +255,8 @@ public class Board {
 						if (playerGrid[exitRow][exitCol] == 0) {
 							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
 							c.leaveRoom();
+							c.setRow(exitRow);
+							c.setCol(exitCol);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -254,18 +271,25 @@ public class Board {
 						return false;
 					}
 					if (r.canEnter(row, col, row+1, col)) {
+						playerGrid[row][col] = 0;
 						r.addCharacter(c);
 						c.enterRoom(r);
 						return true;
 					}
 				}
 			} else if (d.equals(Direction.LEFT)) {
+				if (col == 0) {
+					// trying to move out of the array
+					ui.print("Sorry, you cannot move in that direction");
+					return false;
+				}
 				if (grid[row][col] == 1 
 						&& grid[row][col-1] == 1
 						&& playerGrid[row][col-1] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row][col-1] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					c.setCol(col-1);
 					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
@@ -277,6 +301,8 @@ public class Board {
 						if (playerGrid[exitRow][exitCol] == 0) {
 							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
 							c.leaveRoom();
+							c.setRow(exitRow);
+							c.setCol(exitCol);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -291,18 +317,25 @@ public class Board {
 						return false;
 					}
 					if (r.canEnter(row, col, row, col-1)) {
+						playerGrid[row][col] = 0;
 						r.addCharacter(c);
 						c.enterRoom(r);
 						return true;
 					}
 				}
 			} else if (d.equals(Direction.RIGHT)) {
+				if (col == grid[row].length-1) {
+					// trying to move out of the array
+					ui.print("Sorry, you cannot move in that direction");
+					return false;
+				}
 				if (grid[row][col] == 1 
 						&& grid[row][col+1] == 1
 						&& playerGrid[row][col+1] == 0) {	// cannot move through other characters
 					// in a corridor
 					playerGrid[row][col+1] = playerGrid[row][col];
 					playerGrid[row][col] = 0;
+					c.setCol(col+1);
 					return true;
 				} else if (grid[row][col] != 1) {
 					// inside a room
@@ -314,6 +347,8 @@ public class Board {
 						if (playerGrid[exitRow][exitCol] == 0) {
 							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
 							c.leaveRoom();
+							c.setRow(exitRow);
+							c.setCol(exitCol);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -328,6 +363,7 @@ public class Board {
 						return false;
 					}
 					if (r.canEnter(row, col, row, col+1)) {
+						playerGrid[row][col] = 0;
 						r.addCharacter(c);
 						c.enterRoom(r);
 						return true;
@@ -347,7 +383,7 @@ public class Board {
 		// Welcome players
 		ui.print("Welcome to Cluedo, the Great Detective Game!");
 		// Allow players to choose their characters
-		chooseCharacters(ui.askInt("How many people will be playing?"));
+		setupPlayers(ui.askInt("How many people will be playing?"));
 		// Deal non-murder-component cards to players
 		dealCards();
 		// Put the weapons in rooms, maximum one at a time
@@ -363,193 +399,245 @@ public class Board {
 				int dieRoll = rand.nextInt(5) + 1;
 				boolean hasHypothesised = false;
 				
-				ui.displayBoard();
-				ui.print("You have rolled a "+dieRoll+"!");
-				
 				Room startingRoom = p.character().location();
 				
-				String question = "What would you like to do? (Some options may be unavailable)";
-				String[] options = new String[4];
-				
-				if (startingRoom.hasConnection() && startingRoom.equals(p.character().location())) {
-					options = new String[5];
-					options[4] = "Take the secret stairs";
-				}
-				options[0] = "Move";
-				options[1] = "Make hypothesis";
-				options[2] = "Make accusation";
-				options[3] = "Look at your cards";
-				
-				int choice = ui.askOpt(question, options);
-				
-				if (choice == 1) {
-					// Move
-					// Valid checking will be done by the move method
-					question = "Which direction would you like to move in?";
-					options = new String[4];
-					options[0] = "Up";
-					options[1] = "Right";
-					options[2] = "Down";
-					options[3] = "Left";
+				while (dieRoll > 0 || (p.character().location() != null && !hasHypothesised)) {
+					ui.displayBoard();
+					ui.print("You have "+dieRoll+" moves remaining\n");
 					
-					int moveDir = ui.askOpt(question, options);
+					String question = "What would you like to do? (Some options may be unavailable)";
+					String[] options = new String[4];
 					
-					boolean moved = false;
-					
-					if (moveDir == 1) {
-						moved = move(p.character(), Direction.UP, startingRoom);
-					} else if (moveDir == 2) {
-						moved = move(p.character(), Direction.RIGHT, startingRoom);
-					} else if (moveDir == 3) {
-						moved = move(p.character(), Direction.DOWN, startingRoom);
-					} else if (moveDir == 4) {
-						moved = move(p.character(), Direction.LEFT, startingRoom);
-					} else {
-						ui.print("Sorry, that was not a valid direction.");
+					if (startingRoom != null
+							&& startingRoom.hasConnection()
+							&& startingRoom.equals(p.character().location())) {
+						options = new String[5];
+						options[4] = "Take the secret stairs";
 					}
+					options[0] = "Move";
+					options[1] = "Make hypothesis";
+					options[2] = "Make accusation";
+					options[3] = "Look at your cards";
 					
-					dieRoll -= moved ? 1 : 0;
+					int choice = ui.askOpt(question, options);
 					
-					// if player has entered a room, their turn is over (except for a hypothesis)
-					if (p.character().location() != null && !p.character().location().equals(startingRoom)) {
-						dieRoll = 0;
-					}
-				} else if (choice == 2) {
-					// hypothesis
-					if (p.character().location() == null) {
-						ui.print("Sorry, you cannot hypothesise if you are not inside a room.");
-					} else {
-						Room room = p.character().location();
-						question = "You are hypothesising about a murder which may have happened in the " + room.name().toString();
-						question += "\nWhich character do you think may have commited the murder?";
+					if (choice == 1) {
+						// Move
+						// Valid checking will be done by the move method
+						if (dieRoll <= 0) {
+							ui.print("Sorry, you cannot move any further in this turn");
+						} else {
+							question = "Which direction would you like to move in?";
+							options = new String[4];
+							options[0] = "Up";
+							options[1] = "Right";
+							options[2] = "Down";
+							options[3] = "Left";
+							
+							int moveDir = ui.askOpt(question, options);
+							
+							boolean moved = false;
+							
+							if (moveDir == 1) {
+								moved = move(p.character(), Direction.UP, startingRoom);
+							} else if (moveDir == 2) {
+								moved = move(p.character(), Direction.RIGHT, startingRoom);
+							} else if (moveDir == 3) {
+								moved = move(p.character(), Direction.DOWN, startingRoom);
+							} else if (moveDir == 4) {
+								moved = move(p.character(), Direction.LEFT, startingRoom);
+							} else {
+								ui.print("Sorry, that was not a valid direction.");
+							}
+							
+							dieRoll -= moved ? 1 : 0;
+							
+							// if player has entered a room, their turn is over (except for a hypothesis)
+							if (p.character().location() != null && !p.character().location().equals(startingRoom)) {
+								dieRoll = 0;
+							}
+						}
+					} else if (choice == 2) {
+						// hypothesis
+						if (p.character().location() == null) {
+							ui.print("Sorry, you cannot hypothesise if you are not inside a room.");
+						} else {
+							Room room = p.character().location();
+							question = "You are hypothesising about a murder which may have happened in the " + room.name().toString();
+							question += "\nWhich character do you think may have commited the murder?";
+							
+							options = new String[characters.size()];
+							for (int i = 0; i < characters.size(); i++) {
+								options[i] = characters.get(i).name().toString();
+							}
+							
+							int charAns = ui.askOpt(question, options);
+							Character character = characters.get(charAns-1);
+							
+							question = "You are hypothesising about a murder which "+character.name().toString()
+									+" may have commited in the "+room.name().toString();
+							question += "\nWhich weapon do you think they may have used?";
+							
+							options = new String[weapons.size()];
+							for (int i = 0; i < weapons.size(); i++) {
+								options[i] = weapons.get(i).name().toString();
+							}
+							
+							int weapAns = ui.askOpt(question, options);
+							Weapon weapon = weapons.get(weapAns-1);
+							
+							if (!room.equals(character.location())) {
+								if (character.location() != null)
+									character.location().removeCharacter(character);
+								room.addCharacter(character);
+								character.enterRoom(room);
+							}
+							if (!room.equals(weapon.location())) {
+								weapon.location().removeWeapon(weapon);
+								room.addWeapon(weapon);
+								weapon.moveToRoom(room);
+							}
+							
+							hypothesise(room, character, weapon);
+							hasHypothesised = true;
+							// just to make sure - shouldn't be over 0 at this point anyway
+							dieRoll = 0;
+						}
+					} else if (choice == 3) {
+						// accusation
+						question = "Which room do you think the murder happened in?";
+						options = new String[rooms.size()];
+						for (int i = 0; i < rooms.size(); i++) {
+							options[i] = rooms.get(i).name().toString();
+						}
 						
+						int roomNo = ui.askOpt(question, options);
+						Room room = rooms.get(roomNo-1);
+						
+						question = "Which character do you think commited the murder?";
 						options = new String[characters.size()];
 						for (int i = 0; i < characters.size(); i++) {
 							options[i] = characters.get(i).name().toString();
 						}
 						
-						int charAns = ui.askOpt(question, options);
-						Character character = characters.get(charAns-1);
+						int charNo = ui.askOpt(question, options);
+						Character character = characters.get(charNo-1);
 						
-						question = "You are hypothesising about a murder which "+character.name().toString()
-								+" may have commited in the "+room.name().toString();
-						question += "\nWhich weapon do you think they may have used?";
-						
+						question = "What weapon do you think they commited the murder with?";
 						options = new String[weapons.size()];
 						for (int i = 0; i < weapons.size(); i++) {
 							options[i] = weapons.get(i).name().toString();
 						}
 						
-						int weapAns = ui.askOpt(question, options);
-						Weapon weapon = weapons.get(weapAns-1);
+						int weapNo = ui.askOpt(question, options);
+						Weapon weapon = weapons.get(weapNo-1);
 						
-						if (!room.equals(character.location())) {
-							character.location().removeCharacter(character);
-							room.addCharacter(character);
-							character.enterRoom(room);
+						ui.print("You have accused "+character.name().toString()+" of commiting the murder "
+								+"in the "+room.name().toString()+" with the "+weapon.name().toString());
+						ui.print("All other players, you have 5 seconds to please look away from the screen.");
+						wait(5000);
+						
+						boolean allRight = true;
+						
+						// envelope is set up in order of char -> weapon -> room
+						Character murderChar = ((CharacterCard)envelope.get(0)).character();
+						Weapon murderWeapon = ((WeaponCard)envelope.get(1)).weapon();
+						Room murderRoom = ((RoomCard)envelope.get(2)).room();
+	
+						ui.print("You guessed that the murder happened in the "+room.name().toString());
+						wait(2000);
+						
+						if (room.equals(murderRoom)) {
+							ui.print("Your guess was correct");
+						} else {
+							ui.print("Your guess was incorrect");
+							allRight = false;
 						}
-						if (!room.equals(weapon.location())) {
-							weapon.location().removeWeapon(weapon);
-							room.addWeapon(weapon);
-							weapon.moveToRoom(room);
+						
+						wait(1000);
+						ui.print("You guessed that the murder was committed by "+character.name().toString());
+						wait(2000);
+						
+						if (character.equals(murderChar)) {
+							ui.print("Your guess was correct");
+						} else {
+							ui.print("Your guess was incorrect");
+							allRight = false;
+						}
+	
+						wait(1000);
+						ui.print("You guessed that the murderer used the "+weapon.name().toString());
+						wait(2000);
+						
+						if (weapon.equals(murderWeapon)) {
+							ui.print("Your guess was correct");
+						} else {
+							ui.print("Your guess was incorrect");
+							allRight = false;
 						}
 						
-						hypothesise(room, character, weapon);
+						wait(2000);
 						
-						// just to make sure - shouldn't be over 0 at this point anyway
+						if (allRight) {
+							gameOver = true;
+							ui.print(p.name()+" has won the game! The murder was committed by "+character.name().toString()
+									+" in the "+room.name().toString()+" using the "+weapon.name().toString());
+						} else {
+							ui.clear();
+							ui.print(p.name()+" made an incorrect accusation, and was eliminated from the game.");
+							p.die();
+							wait(5000);
+						}
+						
+						break;	// either way, the player's turn is over now
+					} else if (choice == 4) {
+						lookAtCards(p);
+					} else if (choice == 5) {
+						// secret passageway
+						Room endRoom = startingRoom.connection();
+						startingRoom.removeCharacter(p.character());
+						endRoom.addCharacter(p.character());
+						p.character().enterRoom(endRoom);
 						dieRoll = 0;
 					}
-				} else if (choice == 3) {
-					// accusation
-					question = "Which room do you think the murder happened in?";
-					options = new String[rooms.size()];
-					for (int i = 0; i < rooms.size(); i++) {
-						options[i] = rooms.get(i).name().toString();
-					}
-					
-					int roomNo = ui.askOpt(question, options);
-					Room room = rooms.get(roomNo-1);
-					
-					question = "Which character do you think commited the murder?";
-					options = new String[characters.size()];
-					for (int i = 0; i < characters.size(); i++) {
-						options[i] = characters.get(i).name().toString();
-					}
-					
-					int charNo = ui.askOpt(question, options);
-					Character character = characters.get(charNo-1);
-					
-					question = "What weapon do you think they commited the murder with?";
-					options = new String[weapons.size()];
-					for (int i = 0; i < weapons.size(); i++) {
-						options[i] = weapons.get(i).name().toString();
-					}
-					
-					int weapNo = ui.askOpt(question, options);
-					Weapon weapon = weapons.get(weapNo-1);
-					
-					ui.print("You have accused "+character.name().toString()+" of commiting the murder "
-							+"in the "+room.name().toString()+" with the "+weapon.name().toString());
-					ui.print("All other players, you have 2 seconds to please look away from the screen.");
-					// TODO: kill off this player if they're wrong, make them win the game if they are right
-					long startTime = System.currentTimeMillis();
-					while (System.currentTimeMillis() < startTime+2000);
-					boolean allRight = true;
-					ui.print("You guessed that the murder happened in the "+room.name().toString());
-					startTime = System.currentTimeMillis();
-					while (System.currentTimeMillis() < startTime+500);
-					// TODO: display guesses/correctness - use the envelope for this
-				} else if (choice == 4) {
-					lookAtCards(p);
-				} else if (choice == 5) {
-					Room endRoom = startingRoom.connection();
-					startingRoom.removeCharacter(p.character());
-					endRoom.addCharacter(p.character());
-					p.character().enterRoom(endRoom);
-					dieRoll = 0;
 				}
 				
-				/* TODO: put ^ into loop
-				 * while (dieRoll > 0) {
-					ui.displayBoard();
-					ui.print("You have "+dieRoll+" more moves remaining.");
-				}*/
+				if (gameOver) break;
 			}
 		}
 	}
 	
-	private void chooseCharacters(int people) {
-		while (people > 6 || people < 3) {
+	private void setupPlayers(int people) {
+		while (people > 6 || people < 1) {
 			ui.print("Please enter a number between 3 and 6 (inclusive).");
 			people = ui.askInt("How many people will be playing?");
 		}
 		
-		ArrayList<Integer> charIndices = new ArrayList<Integer>();
+		ArrayList<Character> chars = new ArrayList<Character>();
+		for (Character c : characters)
+			chars.add(c);
 		
 		for (int i = 1; i <= people; i++) {
 			Player p = new Player(ui.askString("Player "+i+", please enter your name:"));
 			
-			String charQuestion = "Which character would you like to play as?";
-			for (int j = 0; j < characters.size(); j++) {
-				if (!charIndices.contains(j)) {
-					charQuestion += "\n\t"+(j+1)+"\t"+characters.get(j).name().toString();
-				}
-			}
-			charQuestion += "\n(Please enter the number corresponding to your choice of character.)";
+			String charQuestion = "Which character would you like to play as, "+p.name()+"?";
+			String[] options = new String[chars.size()];
 			
-			int character = ui.askInt(charQuestion);
-			
-			while (character > 6 || character < 1 || charIndices.contains(character)) {
-				ui.print("Sorry, that is an invalid choice of character.");
-				character = ui.askInt(charQuestion);
+			for (int j = 0; j < chars.size(); j++) {
+				options[j] = chars.get(j).name().toString();
 			}
 			
-			charIndices.add(character);
+			int character = ui.askOpt(charQuestion, options);
 			
-			p.chooseCharacter(characters.get(character));
+			p.chooseCharacter(chars.get(character-1));
+			p.character().assignTo(p);
+			
+			chars.remove(character-1);
 			
 			players.add(p);
 		}
+		
+		setupCharGrid();
 	}
 	
 	private void dealCards() {
@@ -740,8 +828,9 @@ public class Board {
 	
 	private void lookAtCards(Player p) {
 		ui.print("You have 2 seconds to make sure nobody is looking at the screen while you check your cards.");
-		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() < start + 2000);	// will hopefully just 'sleep' until the time is uip
+		
+		wait(2000);
+		
 		ui.print("Your hand:");
 		for (Card card : p.hand()) {
 			ui.print("\t"+card.name());
@@ -751,6 +840,11 @@ public class Board {
 			looking = !ui.askBool("Are you done looking at your cards?");
 		
 		ui.clear();
+	}
+	
+	private void wait(int millis) {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() < start+millis);
 	}
 	
 	private void setupGrids() {
@@ -785,18 +879,6 @@ public class Board {
 		
 		grid = boardArr;
 		
-		int[][] charArr = new int[26][24];
-		
-		// note: these values are the same as the ordinal value (+1) of the respective character's name
-		charArr[25][7] = 1;		// Miss Scarlett
-		charArr[20][23] = 2;	// Professor Plum
-		charArr[7][23] = 3;		// Mrs. Peacock
-		charArr[1][14] = 4;		// Reverend Green
-		charArr[1][9] = 5;		// Mrs. White
-		charArr[18][0] = 6;		// Colonel Mustard
-		
-		playerGrid = charArr;
-		
 		roomNames = new char[26][49];	// for all the room names
 		
 		addName("Kitchen", 3, 3);
@@ -811,6 +893,16 @@ public class Board {
 		addName("Lounge", 21, 4);
 		addName("Hall", 20, 22);
 		addName("Study", 22, 39);
+	}
+	
+	private void setupCharGrid() {
+		playerGrid = new int[26][24];
+		
+		// note: these values are the same as the ordinal value (+1) of the respective character's name
+		for (int i = 0; i < players.size(); i++) {
+			Character c = players.get(i).character();
+			playerGrid[c.name().getRow()][c.name().getCol()] = i + 1;
+		}
 	}
 	
 	private void addName(String name, int row, int column) {
@@ -830,6 +922,14 @@ public class Board {
 	
 	public char[][] getRoomNameGrid() {
 		return roomNames;
+	}
+	
+	public ArrayList<Card> getFaceUpCards() {
+		return faceUpCards;
+	}
+
+	public ArrayList<Player> getPlayers() {
+		return players;
 	}
 	
 	public Room getRoomByCode(int num) {

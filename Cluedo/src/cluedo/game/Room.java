@@ -60,7 +60,22 @@ public class Room {
 	}
 	
 	public void addCharacter(Character c) {
-		characters.add(c);
+		// add character at the end of the list of characters with players
+		// characters without players will be moved along
+		int index = -1;
+		for (int i = 0; i < characters.size(); i++) {
+			if (characters.get(i).player() == null) {
+				index = i;
+				break;
+			}
+		}
+		if (index > -1)
+			characters.add(index, c);
+		else
+			characters.add(c);
+		
+		c.setRow(charRow);
+		c.setCol(charCol);
 	}
 	
 	public void removeCharacter(Character c) {
@@ -199,7 +214,7 @@ public class Room {
 	public boolean hasChar(int row, int charCount) {
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
-				if (charCount == charCol+i) {
+				if (charCount == charCol+i && characters.get(i).player() != null) {
 					return true;
 				}
 			}
@@ -213,11 +228,13 @@ public class Room {
 		return false;
 	}
 	
-	public char getChar(int row, int charCount) {
+	public char getChar(int row, int charCount, Board board) {
+		ArrayList<Player> playerList = board.getPlayers();
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
-				if (charCount == charCol+i) {
-					return characters.get(i).name().toChar();
+				if (charCount == charCol+i && characters.get(i).player() != null) {
+					return (char)('0' + (playerList.indexOf(characters.get(i).player()) + 1));
+					//return characters.get(i).name().toChar();
 				}
 			}
 		} else if (row == wepRow) {

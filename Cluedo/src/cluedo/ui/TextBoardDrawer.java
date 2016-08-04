@@ -1,6 +1,9 @@
 package cluedo.ui;
 
+import java.util.ArrayList;
+
 import cluedo.game.Board;
+import cluedo.game.Card;
 import cluedo.game.Player;
 import cluedo.game.Room;
 
@@ -8,8 +11,9 @@ public class TextBoardDrawer {
 	public static void drawBoard(Board b) {
 		int[][] board = b.getGrid();
 		int[][] players = b.getPlayerGrid();
+		ArrayList<Player> playerList = b.getPlayers();
 		char[][] names = b.getRoomNameGrid();
-		// TODO display face-up cards
+		ArrayList<Card> faceUp = b.getFaceUpCards();
 		
 		Player p = b.getCurrentPlayer();
 		
@@ -115,7 +119,7 @@ public class TextBoardDrawer {
 						if (names[row][charCount] > 0) {
 							System.out.print(names[row][charCount]);
 						} else if (r.hasChar(row, charCount)) {
-							System.out.print(r.getChar(row, charCount));
+							System.out.print(r.getChar(row, charCount, b));
 						} else if (row < board.length-1 && board[row+1][col] <= 1) {
 							if (r.canEnter(row+1, col, row, col)) {
 								System.out.print(" ");
@@ -132,7 +136,7 @@ public class TextBoardDrawer {
 						if (names[row][charCount] > 0) {
 							System.out.print(names[row][charCount]);
 						} else if (r.hasChar(row, charCount)) {
-							System.out.print(r.getChar(row, charCount));
+							System.out.print(r.getChar(row, charCount, b));
 						} else if (col < board[row].length-1 && board[row][col+1] <= 1) {
 							if (r.canEnter(row, col+1, row, col)) {
 								System.out.print(" ");
@@ -155,22 +159,25 @@ public class TextBoardDrawer {
 				System.out.print("      Key:");
 				break;
 			case 7:
-				System.out.print("       1 = Miss Scarlett");
+				System.out.print("       1 = "+playerList.get(0).character().name().toString()+" ("+playerList.get(0).name()+")");
 				break;
 			case 8:
-				System.out.print("       2 = Professor Plum");
+				System.out.print("       2 = "+playerList.get(1).character().name().toString()+" ("+playerList.get(1).name()+")");
 				break;
 			case 9:
-				System.out.print("       3 = Mrs. Peacock");
+				System.out.print("       3 = "+playerList.get(2).character().name().toString()+" ("+playerList.get(2).name()+")");
 				break;
 			case 10:
-				System.out.print("       4 = Reverend Green");
+				if (playerList.size() > 3)
+					System.out.print("       4 = "+playerList.get(3).character().name().toString()+" ("+playerList.get(3).name()+")");
 				break;
 			case 11:
-				System.out.print("       5 = Mrs. White");
+				if (playerList.size() > 4)
+					System.out.print("       5 = "+playerList.get(4).character().name().toString()+" ("+playerList.get(4).name()+")");
 				break;
 			case 12:
-				System.out.print("       6 = Colonel Mustard");
+				if (playerList.size() > 5)
+					System.out.print("       6 = "+playerList.get(5).character().name().toString()+" ("+playerList.get(5).name()+")");
 				break;
 			case 14:
 				System.out.print("       C = Candlestick");
@@ -194,6 +201,16 @@ public class TextBoardDrawer {
 			
 			System.out.println();
 		}
+
+		if (!faceUp.isEmpty()) {
+			System.out.println("Face-up cards:");
+			for (Card c : faceUp) {
+				System.out.println(c.name());
+			}
+			System.out.println();
+		}
+		
+		System.out.println("------------------------------------------------------------------------------");
 	}
 	
 	public static void main(String[] args) {

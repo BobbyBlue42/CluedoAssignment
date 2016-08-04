@@ -11,4 +11,8 @@ public class CharacterCard extends Card {
 	public String name() {
 		return character.name().toString();
 	}
+	
+	public Character character() {
+		return character;
+	}
 }

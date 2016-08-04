@@ -36,7 +36,7 @@ public class TextUI implements UI {
 			}
 		}
 		
-		return new String(arr);
+		return new String(arr).trim();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class TextUI implements UI {
 			byte[] arr = new byte[30];
 			try {
 				System.in.read(arr, 0, arr.length);
-				String s = new String(arr);
+				String s = new String(arr).trim();
 				res = Integer.parseInt(s);
 				break;
 			} catch (IOException e) {
@@ -80,12 +80,12 @@ public class TextUI implements UI {
 		
 		int ans = -1;
 		
-		while (ans <= 0 && ans > options.length) {
+		while (ans <= 0 || ans > options.length) {
 			byte[] arr = new byte[30];
 			
 			try {
 				System.in.read(arr, 0, arr.length);
-				String s = new String(arr);
+				String s = new String(arr).trim();
 				ans = Integer.parseInt(s);
 			} catch (IOException e) {
 				System.out.println("Sorry, something went wrong with reading your answer, please enter it again.");
@@ -109,7 +109,7 @@ public class TextUI implements UI {
 			
 			try {
 				System.in.read(arr, 0, arr.length);
-				String s = new String(arr);
+				String s = new String(arr).trim();
 				if (s.toLowerCase().equals("y") || s.toLowerCase().equals("yes"))
 					return true;
 				else if (s.toLowerCase().equals("n") || s.toLowerCase().equals("no"))
