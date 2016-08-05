@@ -6,7 +6,18 @@ import java.util.Random;
 
 import cluedo.ui.UI;
 
+/**
+ * Stores all the information or references required for a game of Cluedo to complete.
+ * Handles all the main logic of the game, as well as the interfacing with the UI.
+ * 
+ * @author Louis Thie
+ */
 public class Board {
+	/**
+	 * Represents a direction for the player to move in
+	 * 
+	 * @author Louis Thie
+	 */
 	public enum Direction {
 		UP,
 		RIGHT,
@@ -25,28 +36,32 @@ public class Board {
 	
 	private UI ui;
 	
-	// 0 = empty
-	// 1 = corridor
-	// 2 = Kitchen
-	// 3 = Ballroom
-	// 4 = Conservatory
-	// 5 = Billiard Room
-	// 6 = Dining Room
-	// 7 = Library
-	// 8 = Hall
-	// 9 = Lounge
-	// 10 = Study
-	// 11 = NW/SE stairs
-	// 12 = NE/SW stairs
+	/**
+	 * 0 = empty
+	 * 1 = corridor
+	 * 2 = Kitchen
+	 * 3 = Ballroom
+	 * 4 = Conservatory
+	 * 5 = Billiard Room
+	 * 6 = Dining Room
+	 * 7 = Library
+	 * 8 = Hall
+	 * 9 = Lounge
+	 * 10 = Study
+	 * 11 = NW/SE stairs
+	 * 12 = NE/SW stairs
+	 */
 	private int[][] grid;
 	
-	// 0 = empty
-	// 1 = Miss Scarlett
-	// 2 = Professor Plum
-	// 3 = Mrs. Peacock
-	// 4 = Reverend Green
-	// 5 = Mrs. White
-	// 6 = Colonel Mustard
+	/**
+	 * 0 = empty
+	 * 1 = Miss Scarlett
+	 * 2 = Professor Plum
+	 * 3 = Mrs. Peacock
+	 * 4 = Reverend Green
+	 * 5 = Mrs. White
+	 * 6 = Colonel Mustard
+	 */
 	private int[][] playerGrid;
 	
 	private char[][] roomNames;
@@ -55,6 +70,9 @@ public class Board {
 	
 	private boolean gameOver = false;
 	
+	/**
+	 * Constructs a Board object.
+	 */
 	public Board() {
 		players = new ArrayList<Player>();
 		rand = new Random(System.currentTimeMillis());
@@ -62,16 +80,12 @@ public class Board {
 		setupGame();
 	}
 	
-	public void setupGame() {
+	private void setupGame() {
 		setupChars();
 		setupRooms();
 		setupWeapons();
 		setupPack();
 		setupGrids();
-	}
-	
-	public void setUI(UI ui) {
-		this.ui = ui;
 	}
 	
 	private void setupChars() {
@@ -163,15 +177,36 @@ public class Board {
 		}
 	}
 	
+	/**
+	 * Set the UI to be used for this game.
+	 * 
+	 * @param ui	the UI to use
+	 */
+	public void setUI(UI ui) {
+		this.ui = ui;
+	}
+	
+	/**
+	 * Returns the Player whose turn it currently is.
+	 * 
+	 * @return	the current Player
+	 */
 	public Player getCurrentPlayer() {
 		return currentPlayer;
 	}
 	
-	public int dieRoll() {
-		return rand.nextInt(5) + 1;
-	}
-	
-	public boolean move(Character c, Direction d, Room origin) {
+	/**
+	 * Handles the movement of Characters (not including movement through
+	 * secret passageways or movement due to a hypothesis). Also checks the 
+	 * validity of all moves, including not allowing players to re-enter the
+	 * same Room in the same turn.
+	 * 
+	 * @param c			the Character to move
+	 * @param d			the Direction to move in
+	 * @param origin	the Room the Character was in at the start of the turn
+	 * @return			true if the Character was moved, false otherwise
+	 */
+	private boolean move(Character c, Direction d, Room origin) {
 		if (c != null) {
 			int row = c.getRow();
 			int col = c.getCol();
@@ -390,6 +425,9 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Handles the actual running of the game. Calling this will start the game.
+	 */
 	public void run() {
 		// Welcome players
 		ui.print("Welcome to Cluedo, the Great Detective Game!");
@@ -518,8 +556,15 @@ public class Board {
 							Weapon weapon = weapons.get(weapAns-1);
 							
 							if (!room.equals(character.location())) {
-								if (character.location() != null)
+								// first, remove the character from wherever they are right now
+								if (character.location() == null) {
+									// character is on the normal grid
+									playerGrid[character.getRow()][character.getCol()] = 0;
+								} else {
+									// character is in a room
 									character.location().removeCharacter(character);
+								}
+								
 								room.addCharacter(character);
 								character.enterRoom(room);
 							}
@@ -529,7 +574,9 @@ public class Board {
 								weapon.moveToRoom(room);
 							}
 							
+							ui.displayBoard();	// to show that the character and weapon have been moved
 							hypothesise(room, character, weapon);
+							
 							hasHypothesised = true;
 							// just to make sure - shouldn't be over 0 at this point anyway
 							dieRoll = 0;
@@ -716,7 +763,10 @@ public class Board {
 				if (p.equals(currentPlayer))
 					foundCurPlayer = true;
 			} else {
-				ui.print("Asking "+p.name()+" about their cards. Please hand the controls over to them for now.");
+				ui.print("Asking "+p.name()+" about their cards. Please hand the controls over to them for now.\n");
+				wait(1000);
+				ui.print(p.name()+", you have been asked to dispute a hypothesis made by "+currentPlayer.name()
+						+", that the murder was commited by "+c.name()+" in the "+r.name()+" using the "+w.name());
 				boolean lookAtCards = ui.askBool("Would you like to look at your cards before answering?");
 				
 				if (lookAtCards) {
@@ -942,36 +992,71 @@ public class Board {
 		}
 	}
 	
+	/**
+	 * Returns the 2D grid representing the positions of every Player's Character.
+	 * 
+	 * @return	the grid of Characters
+	 */
 	public int[][] getPlayerGrid() {
 		return playerGrid;
 	}
 	
+	/**
+	 * Returns the 2D grid representing the game board.
+	 * 
+	 * @return	the game board
+	 */
 	public int[][] getGrid() {
 		return grid;
 	}
 	
+	/**
+	 * Returns the grid of char values from which the Rooms' names can be found.
+	 * 
+	 * @return	the grid of Room names
+	 */
 	public char[][] getRoomNameGrid() {
 		return roomNames;
 	}
 	
+	/**
+	 * Returns a List of all the cards which were not dealt at the game's start,
+	 * and which must therefore be displayed face-up next to the board (according
+	 * to DJ Pearce).
+	 * 
+	 * @return	ArrayList of face-up Cards
+	 */
 	public ArrayList<Card> getFaceUpCards() {
 		return faceUpCards;
 	}
 
+	/**
+	 * Returns a List of all the Players in the game.
+	 * 
+	 * @return	ArrayList of all the Players
+	 */
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
 	
+	/**
+	 * Returns the Room which is represented by num in the game board.
+	 * Key:
+	 *  2 = Kitchen
+	 *  3 = Ballroom
+	 *  4 = Conservatory
+	 *  5 = Billiard Room
+	 *  6 = Dining Room
+	 *  7 = Library
+	 *  8 = Hall
+	 *  9 = Lounge
+	 * 10 = Study
+	 * 
+	 * @param num	The code of the Room
+	 * @return		The Room represented by num
+	 * @return		null if num does not represent any Room
+	 */
 	public Room getRoomByCode(int num) {
-		// 2 = Kitchen
-		// 3 = Ballroom
-		// 4 = Conservatory
-		// 5 = Billiard Room
-		// 6 = Dining Room
-		// 7 = Library
-		// 8 = Hall
-		// 9 = Lounge
-		// 10 = Study
 		for (Room r : rooms) {
 			if (r.toInt() == num-2)
 				return r;
@@ -979,6 +1064,15 @@ public class Board {
 		return null;
 	}
 
+	/**
+	 * A way for classes other than this to use the UI. Asks the user the 
+	 * question, giving them a choice of all the options. The return value
+	 * will be one larger than the index of the option which was chosen.
+	 * 
+	 * @param question	The question to ask
+	 * @param options	The options to give
+	 * @return			The (index + 1) of the user's choice
+	 */
 	public int askOpt(String question, String[] options) {
 		return ui.askOpt(question, options);
 	}

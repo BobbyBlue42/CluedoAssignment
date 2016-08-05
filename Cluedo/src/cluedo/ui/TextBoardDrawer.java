@@ -7,7 +7,20 @@ import cluedo.game.Card;
 import cluedo.game.Player;
 import cluedo.game.Room;
 
+/**
+ * Handles the drawing of a Cluedo game's board. To be used
+ * in conjunction with a text-based UI, as the drawing involves
+ * the printing of an ASCII representation of the board.
+ * 
+ * @author Louis Thie
+ */
 public class TextBoardDrawer {
+	/**
+	 * Print an ASCII representation of the given Board to
+	 * the console.
+	 * 
+	 * @param b		the Board to print
+	 */
 	public static void drawBoard(Board b) {
 		int[][] board = b.getGrid();
 		int[][] players = b.getPlayerGrid();
@@ -215,14 +228,5 @@ public class TextBoardDrawer {
 
 		System.out.println();
 		System.out.println("------------------------------------------------------------------------------");
-	}
-	
-	public static void main(String[] args) {
-		// for testing purposes
-		//Board b = new Board();
-		//TextBoardDrawer.drawBoard(b);
-		System.out.println("Hello World Foo Bar Bang");
-		for (int i = 0; i < 10; i++)
-			System.out.print("\b ");
 	}
 }

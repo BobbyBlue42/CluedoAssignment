@@ -4,6 +4,12 @@ import cluedo.game.Board;
 import cluedo.ui.TextUI;
 import cluedo.ui.UI;
 
+/**
+ * Entry-point to the Cluedo program. Initialises the game and
+ * restarts it, once it has been completed and if the user wishes to do so.
+ * 
+ * @author Louis Thie
+ */
 public class Main {
 
 	public static void main(String[] args) {

@@ -4,24 +4,49 @@ import java.io.IOException;
 
 import cluedo.game.Board;
 
+/**
+ * A text-based implementation of the UI interface.
+ * 
+ * @author Louis Thie
+ */
 public class TextUI implements UI {
 	
 	private Board board;
 	
+	/**
+	 * Constructs a new TextUI to handle user
+	 * interactions for the given Board.
+	 * 
+	 * @param b		the Board that will use this TextUI
+	 */
 	public TextUI (Board b) {
 		board = b;
 	}
-
+	
+	/**
+	 * Displays the current game board.
+	 */
 	@Override
 	public void displayBoard() {
 		TextBoardDrawer.drawBoard(board);
 	}
-
+	
+	/**
+	 * Displays the given message.
+	 * 
+	 * @param msg	the message to display
+	 */
 	@Override
 	public void print(String msg) {
 		System.out.println(msg);
 	}
 
+	/**
+	 * Asks the user the given question and returns their answer.
+	 * 
+	 * @param question		the question to ask
+	 * @return				the user's answer
+	 */
 	@Override
 	public String askString(String question) {
 		System.out.println(question);
@@ -39,6 +64,13 @@ public class TextUI implements UI {
 		return new String(arr).trim();
 	}
 
+	/**
+	 * Asks the user the given question and returns their response.
+	 * Ensures that the user answers with an integer.
+	 * 
+	 * @param question		the question to ask
+	 * @return				the user's answer
+	 */
 	@Override
 	public int askInt(String question) {
 		System.out.println(question);
@@ -61,14 +93,17 @@ public class TextUI implements UI {
 		
 		return res;
 	}
-	
+
 	/**
-	 * Returns the number of the option which has been selected (1 greater
-	 * than the index of the option in the options array).
+	 * Asks the user the given question and gives them the given
+	 * options to choose from. Ensures the user chooses one of the
+	 * options provided, and returns the user's choice (which will
+	 * be one greater than the index of the option's choice in the
+	 * array of options).
 	 * 
-	 * @param question		The question to ask the user
-	 * @param options		The options to give the user
-	 * @return				The user's choice (index + 1)
+	 * @param question		the question to ask
+	 * @param options		the options to give the user
+	 * @return				the user's choice
 	 */
 	@Override
 	public int askOpt(String question, String[] options) {
@@ -99,7 +134,15 @@ public class TextUI implements UI {
 		
 		return ans;
 	}
-	
+
+	/**
+	 * Asks the user the given question and returns their response.
+	 * Ensures the user answers in a manner which can be translated
+	 * into true or false.
+	 * 
+	 * @param question		the question to ask
+	 * @return				the user's answer
+	 */
 	@Override
 	public boolean askBool(String question) {
 		System.out.println(question+" (y/n)");
@@ -121,7 +164,11 @@ public class TextUI implements UI {
 			}
 		}
 	}
-	
+
+	/**
+	 * Clears the screen of the UI. This is to prevent players from
+	 * seeing each other's cards during the game.
+	 */
 	@Override
 	public void clear() {
 		for (int i = 0; i < 50; i++) System.out.println();

@@ -5,7 +5,19 @@ import java.util.ArrayList;
 
 import cluedo.ui.UI;
 
+/**
+ * Represents the rooms of a Cluedo game, and stores all
+ * information which is necessary to do so.
+ * 
+ * @author Louis Thie
+ */
 public class Room implements GamePiece {
+	/**
+	 * Has all the names of the rooms typically found in a Cluedo
+	 * game.
+	 * 
+	 * @author Louis Thie
+	 */
 	public enum RoomName {
 		KITCHEN,
 		BALLROOM,
@@ -16,7 +28,14 @@ public class Room implements GamePiece {
 		HALL,
 		LOUNGE,
 		STUDY;
-		
+
+		/**
+		 * Returns a human-friendly version of the name of this RoomName.
+		 * That is, all underscores are replaced with spaces and words are
+		 * properly capitalised.
+		 * 
+		 * @return	human-friendly version of this RoomName's name
+		 */
 		public String toString() {
 			char[] name = this.name().replaceAll("_", " ").toCharArray();
 			boolean startOfWord = true;
@@ -47,6 +66,12 @@ public class Room implements GamePiece {
 	private int wepRow, wepCol;
 	private int[][] layout;
 	
+	/**
+	 * Constructs a Room with the given name. Assigns fields
+	 * depending on which name is given.
+	 * 
+	 * @param name	the name of this Room
+	 */
 	public Room(RoomName name) {
 		this.name = name;
 		characters = new ArrayList<Character>();
@@ -55,14 +80,30 @@ public class Room implements GamePiece {
 		assignFields();
 	}
 	
+	/**
+	 * Returns a reader-friendly version of this Character's name.
+	 * 
+	 * @return	reader-friendly name
+	 */
 	public String name() {
 		return name.toString();
 	}
 	
+	/**
+	 * Returns the integer that this Room is represented by
+	 * in the Board's grid.
+	 * 
+	 * @return
+	 */
 	public int toInt() {
 		return name.ordinal();
 	}
 	
+	/**
+	 * Moves a Character into this Room.
+	 * 
+	 * @param c		the Character to add to this Room
+	 */
 	public void addCharacter(Character c) {
 		// add character at the end of the list of characters with players
 		// characters without players will be moved along
@@ -84,42 +125,72 @@ public class Room implements GamePiece {
 		c.setCol(col+1);
 	}
 	
+	/**
+	 * Removes the given Character from this Room.
+	 * 
+	 * @param c		the Character to remove from this Room
+	 */
 	public void removeCharacter(Character c) {
 		characters.remove(c);
 	}
 	
-	public Character[] characters() {
-		return characters.toArray(new Character[characters.size()]);
-	}
-	
+	/**
+	 * Moves the given Weapon into this Room.
+	 * 
+	 * @param w		the Weapon to add to this Room
+	 */
 	public void addWeapon(Weapon w) {
 		weapons.add(w);
 	}
 	
+	/**
+	 * Removes the given Weapon from this Room.
+	 * 
+	 * @param w		the Weapon to remove from this Room
+	 */
 	public void removeWeapon(Weapon w) {
 		weapons.remove(w);
 	}
 	
-	public boolean containsWeapon(Weapon w) {
-		return weapons.contains(w);
-	}
-	
-	public Weapon[] weapons() {
-		return weapons.toArray(new Weapon[weapons.size()]);
-	}
-	
+	/**
+	 * Connects this Room to another Room via a secret passageway.
+	 * 
+	 * @param other		the Room to connect this Room to
+	 */
 	public void connectTo(Room other) {
 		connection = other;
 	}
 	
+	/**
+	 * Checks whether this Room is connected to another Room
+	 * via a secret passageway.
+	 * 
+	 * @return	whether this Room is connected to another Room directly
+	 */
 	public boolean hasConnection() {
 		return connection != null;
 	}
 	
+	/**
+	 * Gets the Room that this Room is connected to via a 
+	 * secret passageway.
+	 * 
+	 * @return	the connected Room
+	 */
 	public Room connection() {
 		return connection;
 	}
 	
+	/**
+	 * Return whether it is possible to enter this Room from the given position,
+	 * heading towards the given position.
+	 * 
+	 * @param fromRow	the Player's current row
+	 * @param fromCol	the Player's current column
+	 * @param toRow		the Player's target row
+	 * @param toCol		the Player's target column
+	 * @return			whether or not it is possible to enter this Room like this
+	 */
 	public boolean canEnter(int fromRow, int fromCol, int toRow, int toCol) {
 		int fRow = fromRow - row;
 		int fCol = fromCol - col;
@@ -147,6 +218,13 @@ public class Room implements GamePiece {
 		return false;
 	}
 	
+	/**
+	 * Checks whether it is possible to leave this Room in the given
+	 * Direction.
+	 * 
+	 * @param d		the Direction to check
+	 * @return		whether there is a door in that Direction
+	 */
 	public boolean canLeave(Board.Direction d) {
 		switch (d) {
 		case UP:
@@ -172,6 +250,15 @@ public class Room implements GamePiece {
 		return false;
 	}
 
+	/**
+	 * Returns a single Point at which the current player will emerge from
+	 * this room. If multiple exits are available in the same Direction,
+	 * asks the user which they would prefer.
+	 * 
+	 * @param d			the Direction the user wants to leave in
+	 * @param board		the Board that contains this Room
+	 * @return			a Point representing the co-ordinates that the Player wants to exit to
+	 */
 	public Point getExitPoint(Board.Direction d, Board board) {
 		ArrayList<Point> exits = new ArrayList<Point>();
 		switch (d) {
@@ -213,6 +300,14 @@ public class Room implements GamePiece {
 		return new Point(-1,-1);
 	}
 	
+	/**
+	 * Checks whether or not this Room contains anything which would
+	 * require to be printed at the given position.
+	 * 
+	 * @param row			The row at which something would be printed
+	 * @param charCount		The count of how many characters have already been printed in this row
+	 * @return				Whether or not something should be printed here
+	 */
 	public boolean hasChar(int row, int charCount) {
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
@@ -230,13 +325,21 @@ public class Room implements GamePiece {
 		return false;
 	}
 	
+	/**
+	 * Returns the character to be printed at the given position.
+	 * This is mainly useful for a text-based UI.
+	 * 
+	 * @param row			The row on the board that the character is being printed in
+	 * @param charCount		The count of how many characters have already been printed in this row
+	 * @param board			the Board containing this Room
+	 * @return				the character that should be printed next
+	 */
 	public char getChar(int row, int charCount, Board board) {
 		ArrayList<Player> playerList = board.getPlayers();
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
 				if (charCount == charCol+i && characters.get(i).player() != null) {
 					return (char)('0' + (playerList.indexOf(characters.get(i).player()) + 1));
-					//return characters.get(i).name().toChar();
 				}
 			}
 		} else if (row == wepRow) {
@@ -336,14 +439,17 @@ public class Room implements GamePiece {
 	// LEFT = doorway leading left
 	
 	// doorways
-	private final int UP = 10, RIGHT = 11, DOWN = 12, LEFT = 13; 
+	private final static int UP = 10;
+	private final static int RIGHT = 11;
+	private final static int DOWN = 12;
+	private final static int LEFT = 13; 
 	
 	// Kitchen coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int kitchenRow = 2, kitchenCol = 0;
-	private int kitchenCharRow = 5, kitchenCharCol = 4;
-	private int kitchenWepRow = 6, kitchenWepCol = 44;
-	private int[][] kitchen = {
+	private static final int kitchenRow = 2, kitchenCol = 0;
+	private static final int kitchenCharRow = 5, kitchenCharCol = 4;
+	private static final int kitchenWepRow = 6, kitchenWepCol = 44;
+	private static final int[][] kitchen = {
 			{1, 1, 1, 1, 1, 2},
 			{1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1},
@@ -354,10 +460,10 @@ public class Room implements GamePiece {
 	
 	// Ballroom coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int ballroomRow = 2, ballroomCol = 8;
-	private int ballroomCharRow = 6, ballroomCharCol = 23;
-	private int ballroomWepRow = 7, ballroomWepCol = 23;
-	private int[][] ballroom = {
+	private static final int ballroomRow = 2, ballroomCol = 8;
+	private static final int ballroomCharRow = 6, ballroomCharCol = 23;
+	private static final int ballroomWepRow = 7, ballroomWepCol = 23;
+	private static final int[][] ballroom = {
 			{0, 0, 1, 1, 1, 1, 0, 0},
 			{1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1, 1},
@@ -369,10 +475,10 @@ public class Room implements GamePiece {
 	
 	// Conservatory coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int conservatoryRow = 2, conservatoryCol = 18;
-	private int conservatoryCharRow = 4, conservatoryCharCol = 41;
-	private int conservatoryWepRow = 5, conservatoryWepCol = 41;
-	private int[][] conservatory = {
+	private static final int conservatoryRow = 2, conservatoryCol = 18;
+	private static final int conservatoryCharRow = 4, conservatoryCharCol = 41;
+	private static final int conservatoryWepRow = 5, conservatoryWepCol = 41;
+	private static final int[][] conservatory = {
 			{1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1},
@@ -382,10 +488,10 @@ public class Room implements GamePiece {
 	
 	// Billiard room coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int billiardRow = 9, billiardCol = 18;
-	private int billiardCharRow = 11, billiardCharCol = 41;
-	private int billiardWepRow = 12, billiardWepCol = 41;
-	private int[][] billiard = {
+	private static final int billiardRow = 9, billiardCol = 18;
+	private static final int billiardCharRow = 11, billiardCharCol = 41;
+	private static final int billiardWepRow = 12, billiardWepCol = 41;
+	private static final int[][] billiard = {
 			{1, 1, 1, 1, 1, 1},
 			{LEFT, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1},
@@ -395,10 +501,10 @@ public class Room implements GamePiece {
 	
 	// Dining room coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int diningRow = 10, diningCol = 0;
-	private int diningCharRow = 14, diningCharCol = 5;
-	private int diningWepRow = 15, diningWepCol = 5;
-	private int[][] dining = {
+	private static final int diningRow = 10, diningCol = 0;
+	private static final int diningCharRow = 14, diningCharCol = 5;
+	private static final int diningWepRow = 15, diningWepCol = 5;
+	private static final int[][] dining = {
 			{1, 1, 1, 1, 1, 0, 0, 0},
 			{1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1, 1},
@@ -410,10 +516,10 @@ public class Room implements GamePiece {
 	
 	// Library coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int libraryRow = 15, libraryCol = 17;
-	private int libraryCharRow = 17, libraryCharCol = 39;
-	private int libraryWepRow = 18, libraryWepCol = 39;
-	private int[][] library = {
+	private static final int libraryRow = 15, libraryCol = 17;
+	private static final int libraryCharRow = 17, libraryCharCol = 39;
+	private static final int libraryWepRow = 18, libraryWepCol = 39;
+	private static final int[][] library = {
 			{0, 1, 1, UP, 1, 1, 0},
 			{1, 1, 1, 1, 1, 1, 1},
 			{LEFT, 1, 1, 1, 1, 1, 1},
@@ -423,10 +529,10 @@ public class Room implements GamePiece {
 	
 	// Hall coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int hallRow = 19, hallCol = 9;
-	private int hallCharRow = 22, hallCharCol = 21;
-	private int hallWepRow = 24, hallWepCol = 21; 
-	private int[][] hall = {
+	private static final int hallRow = 19, hallCol = 9;
+	private static final int hallCharRow = 22, hallCharCol = 21;
+	private static final int hallWepRow = 24, hallWepCol = 21; 
+	private static final int[][] hall = {
 			{1, 1, UP, UP, 1, 1},
 			{1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, RIGHT},
@@ -438,10 +544,10 @@ public class Room implements GamePiece {
 	
 	// Lounge coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int loungeRow = 20, loungeCol = 0;
-	private int loungeCharRow = 23, loungeCharCol = 4;
-	private int loungeWepRow = 24, loungeWepCol = 4;
-	private int[][] lounge = {
+	private static final int loungeRow = 20, loungeCol = 0;
+	private static final int loungeCharRow = 23, loungeCharCol = 4;
+	private static final int loungeWepRow = 24, loungeWepCol = 4;
+	private static final int[][] lounge = {
 			{1, 1, 1, 1, 1, 1, UP},
 			{1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1},
@@ -452,10 +558,10 @@ public class Room implements GamePiece {
 	
 	// Study coordinates on the map and floor layout,
 	// and character list starting coordinates
-	private int studyRow = 22, studyCol = 17;
-	private int studyCharRow = 23, studyCharCol = 39;
-	private int studyWepRow = 24, studyWepCol = 39;
-	private int[][] study = {
+	private static final int studyRow = 22, studyCol = 17;
+	private static final int studyCharRow = 23, studyCharCol = 39;
+	private static final int studyWepRow = 24, studyWepCol = 39;
+	private static final int[][] study = {
 			{UP, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1},
