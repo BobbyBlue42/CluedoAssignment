@@ -59,11 +59,14 @@ public class Board {
 		players = new ArrayList<Player>();
 		rand = new Random(System.currentTimeMillis());
 		
+		setupGame();
+	}
+	
+	public void setupGame() {
 		setupChars();
 		setupRooms();
 		setupWeapons();
 		setupPack();
-		
 		setupGrids();
 	}
 	
@@ -142,38 +145,26 @@ public class Board {
 		int murderRoom = rand.nextInt(rooms.size());
 		
 		for (int i = 0; i < characters.size(); i++) {
-			pack.add(new CharacterCard(characters.get(i), i == murderChar));
+			pack.add(new Card(characters.get(i), i == murderChar));
 			if (i == murderChar)
 				envelope.add(pack.get(pack.size()-1));
 		}
 		
 		for (int i = 0; i < weapons.size(); i++) {
-			pack.add(new WeaponCard(weapons.get(i), i == murderWeapon));
+			pack.add(new Card(weapons.get(i), i == murderWeapon));
 			if (i == murderWeapon)
 				envelope.add(pack.get(pack.size()-1));
 		}
 		
 		for (int i = 0; i < rooms.size(); i++) {
-			pack.add(new RoomCard(rooms.get(i), i == murderRoom));
+			pack.add(new Card(rooms.get(i), i == murderRoom));
 			if (i == murderRoom)
 				envelope.add(pack.get(pack.size()-1));
 		}
 	}
-
-	public void endTurn() {
-		int i = players.indexOf(currentPlayer) + 1;
-		if (i == players.size())
-			i = 0;
-		currentPlayer = players.get(i);
-	}
 	
 	public Player getCurrentPlayer() {
 		return currentPlayer;
-	}
-	
-	public void deal(Card c, Player p) {
-		c.dealTo(p);
-		p.deal(c);
 	}
 	
 	public int dieRoll() {
@@ -203,11 +194,11 @@ public class Board {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d, ui);
+						Point exit = r.getExitPoint(d, this);
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							playerGrid[exitRow][exitCol] = c.toInt() + 1;
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
@@ -218,6 +209,11 @@ public class Board {
 						}
 					}
 				} else if (grid[row-1][col] != 1) {
+					if (grid[row-1][col] == 0) {
+						// trying to move out of the array
+						ui.print("Sorry, you cannot move in that direction");
+						return false;
+					}
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row-1][col]);
 					if (r.equals(origin)) {
@@ -249,11 +245,11 @@ public class Board {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d, ui);
+						Point exit = r.getExitPoint(d, this);
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							playerGrid[exitRow][exitCol] = c.toInt() + 1;
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
@@ -264,6 +260,11 @@ public class Board {
 						}
 					}
 				} else if (grid[row+1][col] != 1) {
+					if (grid[row+1][col] == 0) {
+						// trying to move out of the array
+						ui.print("Sorry, you cannot move in that direction");
+						return false;
+					}
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row+1][col]);
 					if (r.equals(origin)) {
@@ -295,11 +296,11 @@ public class Board {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d, ui);
+						Point exit = r.getExitPoint(d, this);
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							playerGrid[exitRow][exitCol] = c.toInt() + 1;
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
@@ -310,6 +311,11 @@ public class Board {
 						}
 					}
 				} else if (grid[row][col-1] != 1) {
+					if (grid[row][col-1] == 0) {
+						// trying to move out of the array
+						ui.print("Sorry, you cannot move in that direction");
+						return false;
+					}
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row][col-1]);
 					if (r.equals(origin)) {
@@ -341,11 +347,11 @@ public class Board {
 					// inside a room
 					Room r = getRoomByCode(grid[row][col]);
 					if (r.canLeave(d)) {
-						Point exit = r.getExitPoint(d, ui);
+						Point exit = r.getExitPoint(d, this);
 						int exitRow = (int) exit.getX();
 						int exitCol = (int) exit.getY();
 						if (playerGrid[exitRow][exitCol] == 0) {
-							playerGrid[exitRow][exitCol] = c.name().ordinal() + 1;
+							playerGrid[exitRow][exitCol] = c.toInt() + 1;
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
@@ -356,6 +362,11 @@ public class Board {
 						}
 					}
 				} else if (grid[row][col+1] != 0) {
+					if (grid[row][col+1] == 0) {
+						// trying to move out of the array
+						ui.print("Sorry, you cannot move in that direction");
+						return false;
+					}
 					// trying to enter a room
 					Room r = getRoomByCode(grid[row][col+1]);
 					if (r.equals(origin)) {
@@ -391,6 +402,26 @@ public class Board {
 		
 		while (!gameOver) {
 			for (Player p : players) {
+				// check how many players are left alive - if only 1 player left, they win
+				int aliveCount = 0;
+				for (Player player : players)
+					if (player.isAlive())
+						aliveCount++;
+				
+				if (aliveCount == 1) {
+					Player lastPlayer = null;
+					for (Player player : players) {
+						if (player.isAlive())
+							lastPlayer = player;
+					}
+					if (lastPlayer != null) {
+						ui.print(lastPlayer.name()+" is the last player left alive, and thus wins the game");
+						gameOver = true;
+						break;
+					}
+					throw new RuntimeException("Should not be able to not have a last player");
+				}
+				
 				if (!p.isAlive())	// if player has made a false accusation
 					continue;		// skip them because they are out of the game
 				
@@ -540,9 +571,9 @@ public class Board {
 						boolean allRight = true;
 						
 						// envelope is set up in order of char -> weapon -> room
-						Character murderChar = ((CharacterCard)envelope.get(0)).character();
-						Weapon murderWeapon = ((WeaponCard)envelope.get(1)).weapon();
-						Room murderRoom = ((RoomCard)envelope.get(2)).room();
+						Character murderChar = (Character)envelope.get(0).piece();
+						Weapon murderWeapon = (Weapon)envelope.get(1).piece();
+						Room murderRoom = (Room)envelope.get(2).piece();
 	
 						ui.print("You guessed that the murder happened in the "+room.name().toString());
 						wait(2000);
@@ -653,7 +684,6 @@ public class Board {
 			for (Player p : players) {
 				Card c = cards.remove(rand.nextInt(cards.size()));
 				p.deal(c);
-				c.dealTo(p);
 			}
 		}
 		
@@ -709,7 +739,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(r.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -719,7 +749,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(c.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -729,7 +759,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(w.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -781,7 +811,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(r.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -791,7 +821,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(c.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -801,7 +831,7 @@ public class Board {
 						for (Card card : p.hand())
 							if (card.name().equals(w.name().toString())) {
 								ui.print(p.name()+" has disproven the hypothesis that the murder was commited by "+c.name().toString()
-										+" in the "+r.name().toString()+" with "+w.name().toString()+" by showing that they are holding "
+										+" in the "+r.name().toString()+" with the "+w.name().toString()+" by showing that they are holding "
 										+"the "+card.name()+" card.");
 								return;
 							}
@@ -901,7 +931,7 @@ public class Board {
 		// note: these values are the same as the ordinal value (+1) of the respective character's name
 		for (int i = 0; i < players.size(); i++) {
 			Character c = players.get(i).character();
-			playerGrid[c.name().getRow()][c.name().getCol()] = i + 1;
+			playerGrid[c.getStartRow()][c.getStartCol()] = i + 1;
 		}
 	}
 	
@@ -943,9 +973,13 @@ public class Board {
 		// 9 = Lounge
 		// 10 = Study
 		for (Room r : rooms) {
-			if (r.name().ordinal() == num-2)
+			if (r.toInt() == num-2)
 				return r;
 		}
 		return null;
+	}
+
+	public int askOpt(String question, String[] options) {
+		return ui.askOpt(question, options);
 	}
 }

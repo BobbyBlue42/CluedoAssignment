@@ -1,6 +1,6 @@
 package cluedo.game;
 
-public class Weapon {
+public class Weapon implements GamePiece {
 	public enum WeaponName {
 		CANDLESTICK('C'),
 		DAGGER('D'),
@@ -47,8 +47,12 @@ public class Weapon {
 		location = room;
 	}
 	
-	public WeaponName name() {
-		return name;
+	public String name() {
+		return name.toString();
+	}
+	
+	public char toChar() {
+		return name.toChar();
 	}
 	
 	public Room location() {

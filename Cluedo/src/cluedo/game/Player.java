@@ -25,10 +25,6 @@ public class Player {
 		hand.add(c);
 	}
 	
-	public boolean isHolding(Card c) {
-		return hand.contains(c);
-	}
-	
 	public Card[] hand() {
 		return hand.toArray(new Card[hand.size()]);
 	}
@@ -39,6 +35,8 @@ public class Player {
 	
 	public void die() {
 		isAlive = false;
+		if (character.location() != null)
+			character.location().removeCharacter(character);
 	}
 	
 	public String name() {

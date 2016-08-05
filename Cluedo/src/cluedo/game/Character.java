@@ -2,7 +2,7 @@ package cluedo.game;
 
 import java.awt.Point;
 
-public class Character {
+public class Character implements GamePiece {
 	public enum CharacterName {
 		MISS_SCARLETT(25, 7),
 		PROFESSOR_PLUM(20, 23),
@@ -59,8 +59,12 @@ public class Character {
 		this.col = col;
 	}
 	
-	public CharacterName name() {
-		return name;
+	public String name() {
+		return name.toString();
+	}
+	
+	public int toInt() {
+		return name.ordinal();
 	}
 	
 	public void assignTo(Player p) {
@@ -82,6 +86,10 @@ public class Character {
 	public Room location() {
 		return location;
 	}
+	
+	public int getStartRow() {
+		return name.getRow();
+	}
 
 	public int getRow() {
 		return row;
@@ -89,6 +97,10 @@ public class Character {
 	
 	public void setRow(int row) {
 		this.row = row;
+	}
+	
+	public int getStartCol() {
+		return name.getCol();
 	}
 	
 	public int getCol() {

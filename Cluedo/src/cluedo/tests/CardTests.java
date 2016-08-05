@@ -14,71 +14,7 @@ public class CardTests {
 	private Weapon w1, w2;
 	private Card c1, c2;
 	
-	@Test
-	public void testCharacterCard() {
-		setup();
-		
-		c1 = new CharacterCard(ch1, true);
-		c2 = new CharacterCard(ch2, false);
-		
-		assertTrue(c1.isMurderComponent());
-		assertFalse(c2.isMurderComponent());
-		assertEquals("Colonel Mustard", c1.name());
-		assertEquals("Miss Scarlet", c2.name());
-		
-		board.deal(c1, p1);
-		board.deal(c2, p2);
-		
-		assertEquals(p1, c1.holder());
-		assertEquals(p2, c2.holder());
-		
-		assertTrue(p1.isHolding(c1));
-		assertTrue(p2.isHolding(c2));
-	}
-	
-	@Test
-	public void testRoomCard() {
-		setup();
-		
-		c1 = new RoomCard(r1, true);
-		c2 = new RoomCard(r2, false);
-		
-		assertTrue(c1.isMurderComponent());
-		assertFalse(c2.isMurderComponent());
-		assertEquals("Ballroom", c1.name());
-		assertEquals("Billiard Room", c2.name());
-		
-		board.deal(c1, p1);
-		board.deal(c2, p2);
-		
-		assertEquals(p1, c1.holder());
-		assertEquals(p2, c2.holder());
-		
-		assertTrue(p1.isHolding(c1));
-		assertTrue(p2.isHolding(c2));
-	}
-	
-	@Test
-	public void testWeaponCard() {
-		setup();
-		
-		c1 = new WeaponCard(w1, true);
-		c2 = new WeaponCard(w2, false);
-		
-		assertTrue(c1.isMurderComponent());
-		assertFalse(c2.isMurderComponent());
-		assertEquals("Candlestick", c1.name());
-		assertEquals("Lead Pipe", c2.name());
-		
-		board.deal(c1, p1);
-		board.deal(c2, p2);
-		
-		assertEquals(p1, c1.holder());
-		assertEquals(p2, c2.holder());
-		
-		assertTrue(p1.isHolding(c1));
-		assertTrue(p2.isHolding(c2));
-	}
+	// TODO: implement some tests
 	
 	private void setup() {
 		board = new Board();

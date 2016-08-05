@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import cluedo.ui.UI;
 
-public class Room {
+public class Room implements GamePiece {
 	public enum RoomName {
 		KITCHEN,
 		BALLROOM,
@@ -55,8 +55,12 @@ public class Room {
 		assignFields();
 	}
 	
-	public RoomName name() {
-		return name;
+	public String name() {
+		return name.toString();
+	}
+	
+	public int toInt() {
+		return name.ordinal();
 	}
 	
 	public void addCharacter(Character c) {
@@ -74,16 +78,14 @@ public class Room {
 		else
 			characters.add(c);
 		
-		c.setRow(charRow);
-		c.setCol(charCol);
+		// doesn't matter if the characters are all stacked on top of each other
+		// also, all of the rooms have a '1' at (relative) (1,1)
+		c.setRow(row+1);
+		c.setCol(col+1);
 	}
 	
 	public void removeCharacter(Character c) {
 		characters.remove(c);
-	}
-	
-	public boolean containsCharacter(Character c) {
-		return characters.contains(c);
 	}
 	
 	public Character[] characters() {
@@ -170,7 +172,7 @@ public class Room {
 		return false;
 	}
 
-	public Point getExitPoint(Board.Direction d, UI ui) {
+	public Point getExitPoint(Board.Direction d, Board board) {
 		ArrayList<Point> exits = new ArrayList<Point>();
 		switch (d) {
 		case UP:
@@ -195,13 +197,13 @@ public class Room {
 		}
 		
 		if (exits.size() > 1) {
-			String question = "There are multiple exits in this direction.\nWould you like to use the exit leading to:";
+			String question = "There are multiple exits in this direction.\nWhich exit would you like to use?";
+			String[] options = new String[exits.size()];
 			for (int i = 0; i < exits.size(); i++) {
-				question += "\n\t"+(i+1)+"\t("+exits.get(i).getX()+","+exits.get(i).getY()+")";
+				options[i] = "("+exits.get(i).getX()+","+exits.get(i).getY()+")";
 			}
-			question += "?\n(Please enter the number of your answer.)";
 			
-			int ans = ui.askInt(question);
+			int ans = board.askOpt(question, options);
 			
 			return exits.get(ans-1);
 		} else if (exits.size() == 1) {
@@ -214,7 +216,7 @@ public class Room {
 	public boolean hasChar(int row, int charCount) {
 		if (row == charRow) {
 			for (int i = 0; i < characters.size(); i++) {
-				if (charCount == charCol+i && characters.get(i).player() != null) {
+				if (charCount == charCol+i && characters.get(i).player() != null && characters.get(i).player().isAlive()) {
 					return true;
 				}
 			}
@@ -240,7 +242,7 @@ public class Room {
 		} else if (row == wepRow) {
 			for (int i = 0; i < weapons.size(); i++) {
 				if (charCount == wepCol+i) {
-					return weapons.get(i).name().toChar();
+					return weapons.get(i).toChar();
 				}
 			}
 		}
