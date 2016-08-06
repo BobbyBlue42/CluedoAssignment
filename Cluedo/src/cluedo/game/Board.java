@@ -927,6 +927,9 @@ public class Board {
 				}
 			}
 		}
+		
+		ui.print("No player was able to dispute the hypothesis that the murder was committed by "+c.name()
+				+" in the "+r.name()+" using the "+w.name()+".");
 	}
 	
 	private void lookAtCards(Player p) {
