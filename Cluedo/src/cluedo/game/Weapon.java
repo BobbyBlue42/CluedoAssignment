@@ -87,6 +87,15 @@ public class Weapon implements GamePiece {
 	public String name() {
 		return name.toString();
 	}
+
+	/**
+	 * Returns the integer this Weapon may be represented by.
+	 * 
+	 * @return	integer representation of this Weapon
+	 */
+	public int toInt() {
+		return name.ordinal();
+	}
 	
 	/**
 	 * Returns the character this Weapon is represented by on the Board.

@@ -135,6 +135,15 @@ public class Room implements GamePiece {
 	}
 	
 	/**
+	 * Returns a List of all the Characters in this Room.
+	 * 
+	 * @return		ArrayList of Characters in this Room
+	 */
+	public ArrayList<Character> getCharacters() {
+		return characters;
+	}
+	
+	/**
 	 * Moves the given Weapon into this Room.
 	 * 
 	 * @param w		the Weapon to add to this Room
@@ -150,6 +159,15 @@ public class Room implements GamePiece {
 	 */
 	public void removeWeapon(Weapon w) {
 		weapons.remove(w);
+	}
+	
+	/**
+	 * Returns a List of all the Weapons in this Room.
+	 * 
+	 * @return		ArrayList of Weapons in this Room
+	 */
+	public ArrayList<Weapon> getWeapons() {
+		return weapons;
 	}
 	
 	/**
@@ -287,7 +305,7 @@ public class Room implements GamePiece {
 			String question = "There are multiple exits in this direction.\nWhich exit would you like to use?";
 			String[] options = new String[exits.size()];
 			for (int i = 0; i < exits.size(); i++) {
-				options[i] = "("+exits.get(i).getX()+","+exits.get(i).getY()+")";
+				options[i] = "Row "+exits.get(i).getX()+", Column "+exits.get(i).getY();
 			}
 			
 			int ans = board.askOpt(question, options);
@@ -297,7 +315,7 @@ public class Room implements GamePiece {
 			return exits.get(0);
 		}
 		
-		return new Point(-1,-1);
+		return null;	// there are no exit points in this direction
 	}
 	
 	/**
@@ -448,7 +466,7 @@ public class Room implements GamePiece {
 	// and character list starting coordinates
 	private static final int kitchenRow = 2, kitchenCol = 0;
 	private static final int kitchenCharRow = 5, kitchenCharCol = 4;
-	private static final int kitchenWepRow = 6, kitchenWepCol = 44;
+	private static final int kitchenWepRow = 6, kitchenWepCol = 4;
 	private static final int[][] kitchen = {
 			{1, 1, 1, 1, 1, 2},
 			{1, 1, 1, 1, 1, 1},

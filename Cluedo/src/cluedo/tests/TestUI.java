@@ -1,4 +1,6 @@
-package cluedo.ui;
+package cluedo.tests;
+
+import cluedo.ui.UI;
 
 import java.util.ArrayDeque;
 import java.util.Queue;

@@ -67,15 +67,16 @@ public class Board {
 	private char[][] roomNames;
 	
 	private Random rand;
-	
+	private boolean fastMode;
 	private boolean gameOver = false;
 	
 	/**
 	 * Constructs a Board object.
 	 */
-	public Board() {
+	public Board(boolean fastMode) {
 		players = new ArrayList<Player>();
 		rand = new Random(System.currentTimeMillis());
+		this.fastMode = fastMode;
 		
 		setupGame();
 	}
@@ -237,6 +238,7 @@ public class Board {
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
+							r.removeCharacter(c);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -288,6 +290,7 @@ public class Board {
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
+							r.removeCharacter(c);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -339,6 +342,7 @@ public class Board {
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
+							r.removeCharacter(c);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -390,6 +394,7 @@ public class Board {
 							c.leaveRoom();
 							c.setRow(exitRow);
 							c.setCol(exitCol);
+							r.removeCharacter(c);
 							return true;
 						} else {
 							ui.print("Sorry, there is already a character standing in that spot.");
@@ -432,13 +437,6 @@ public class Board {
 	 */
 	public boolean gameOver() {
 		return gameOver;
-	}
-	
-	/**
-	 * Sets gameOver to true.
-	 */
-	public void setGameOver() {
-		gameOver = true;
 	}
 	
 	/**
@@ -678,6 +676,28 @@ public class Board {
 				dieRoll = 0;
 			}
 		}
+		
+		// check how many players are left alive - if only one person is left,
+		// they have won
+		int aliveCount = 0;
+		for (Player player : players) {
+			if (player.isAlive())
+				aliveCount++;
+		}
+		
+		if (aliveCount == 1) {
+			Player lastPlayer = null;
+			for (Player player : players) {
+				if (player.isAlive())
+					lastPlayer = player;
+			}
+			if (lastPlayer != null) {
+				ui.print(lastPlayer.name()+" is the last player left alive, and thus wins the game");
+				gameOver = true;
+				return;
+			}
+			throw new RuntimeException("Should not be able to not have a last player");
+		}
 	}
 	
 	private void setupPlayers() {
@@ -811,7 +831,7 @@ public class Board {
 								return;
 							}
 						ui.print("You cannot dispute a hypothesis unless you have one of the corresponding cards in your hand.");
-					} else {
+					} else if (choice == 4) {
 						// claiming they cannot dispute
 						boolean found = false;
 						for (Card card : p.hand())
@@ -825,6 +845,12 @@ public class Board {
 							}
 						if (found) continue;
 						else break;
+					} else if (choice == 5) {
+						// disputing for testing purposes (cannot be reached with normal ui)
+						return;
+					} else if (choice == 6) {
+						// not disputing for testing purposes (cannot be reached with normal ui)
+						break;
 					}
 				}
 			}
@@ -920,6 +946,7 @@ public class Board {
 	}
 	
 	private void wait(int millis) {
+		if (fastMode) return;
 		long start = System.currentTimeMillis();
 		while (System.currentTimeMillis() < start+millis);
 	}
@@ -1074,6 +1101,17 @@ public class Board {
 	 */
 	public ArrayList<Card> getPack() {
 		return pack;
+	}
+	
+	/**
+	 * Returns a List of the Cards in the murder envelope.
+	 * The Cards represent, in order, the Character, Weapon
+	 * and Room that make up the murder scenario.
+	 * 
+	 * @return		ArrayList of the murder components
+	 */
+	public ArrayList<Card> getEnvelope() {
+		return envelope;
 	}
 	
 	/**
