@@ -51,7 +51,7 @@ public class TextBoardDrawer {
 						} else if (row == board.length-1) {
 							System.out.print("_");
 						} else if (board[row][col] == 12) {
-							System.out.print("¤");
+							System.out.print("X");
 						} else if (row < board.length-1 && board[row+1][col] == 0) {
 							System.out.print("_");
 						} else {
@@ -116,7 +116,7 @@ public class TextBoardDrawer {
 						}
 						charCount+=2;
 					} else if (board[row][col] == 11) {							// NW-SE Stairs
-						System.out.print("±");
+						System.out.print("x");
 						if (col < board[row].length-1 && board[row][col+1] > 1) {
 							System.out.print(" ");
 						} else {
@@ -124,7 +124,7 @@ public class TextBoardDrawer {
 						}
 						charCount+=2;
 					} else if (board[row][col] == 12) {							// NE-SW Stairs
-						System.out.print("¤");
+						System.out.print("X");
 						if (col < board[row].length-1 && board[row][col+1] > 1) {
 							System.out.print(" ");
 						} else {
@@ -214,6 +214,11 @@ public class TextBoardDrawer {
 			case 19:
 				System.out.print("       S = Spanner");
 				break;
+			case 21:
+				System.out.print("       x = NW/SE passage");
+				break;
+			case 22:
+				System.out.print("       X = NE/SW passage");
 			}
 			
 			System.out.println();
