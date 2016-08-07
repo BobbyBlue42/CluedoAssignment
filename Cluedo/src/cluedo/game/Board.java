@@ -669,6 +669,8 @@ public class Board {
 				lookAtCards(p);
 			} else if (choice == 5) {
 				// secret passageway
+				if (startingRoom == null)	// shouldn't even be an option if
+					throw new RuntimeException();	// startingRoom is null
 				Room endRoom = startingRoom.connection();
 				startingRoom.removeCharacter(p.character());
 				endRoom.addCharacter(p.character());
