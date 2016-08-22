@@ -1,11 +1,7 @@
 package cluedo;
 
-import java.util.Random;
-
 import cluedo.game.Board;
-import cluedo.game.Player;
-import cluedo.ui.TextUI;
-import cluedo.ui.UI;
+import cluedo.gui.GraphicsUI;
 
 /**
  * Entry-point to the Cluedo program. Initialises the game and
@@ -14,8 +10,12 @@ import cluedo.ui.UI;
  * @author Louis Thie
  */
 public class Main {
-
+	private static GraphicsUI gui;
+	
 	public static void main(String[] args) {
+		gui = new GraphicsUI(new Board());
+		
+		/* TextUI setup
 		boolean fastMode = false;
 		
 		for (String s : args) {
@@ -26,8 +26,8 @@ public class Main {
 		while (true) {
 			Random rand = new Random(System.currentTimeMillis());
 			Board board = new Board(fastMode);
-			UI ui = new TextUI(board);
-			board.setUI(ui);
+			GraphicsUI gui = new GraphicsUI(board);
+			board.setUI(gui);
 			board.startGame();
 			
 			while (!board.gameOver()) {
@@ -38,16 +38,22 @@ public class Main {
 					
 					int dieRoll = rand.nextInt(6)+1;
 					
-					board.playTurn(p, dieRoll);
+					//board.playTurn(p, dieRoll);
 					
 					if (board.gameOver())
 						break;
 				}
 			}
 			
-			if (!ui.askBool("Would you like to play again?"))
-				break;
-		}
+			//if (!ui.askBool("Would you like to play again?"))
+			//	break;
+		}*/
+	}
+	
+	public static void restartGame() {
+		gui.setVisible(false);
+		gui.dispose();
+		gui = new GraphicsUI(new Board());
 	}
 
 }

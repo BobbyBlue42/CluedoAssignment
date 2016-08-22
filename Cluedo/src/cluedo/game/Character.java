@@ -1,6 +1,6 @@
 package cluedo.game;
 
-import java.awt.Point;
+import javax.swing.ImageIcon;
 
 /**
  * Represents the characters of a Cluedo game, and stores all
@@ -24,6 +24,32 @@ public class Character implements GamePiece {
 		COLONEL_MUSTARD(18, 0);
 		
 		private int startRow, startCol;
+
+		// card images downloaded from https://nz.pinterest.com/ewenowho/cluedo-inspired-yarn/
+		private static ImageIcon MISS_SCARLETT_room_icon = new ImageIcon(Character.class.getResource("img/MISS_SCARLETT_room.png"));
+		private static ImageIcon MISS_SCARLETT_floor_icon = new ImageIcon(Character.class.getResource("img/MISS_SCARLETT_floor.png"));
+		private static ImageIcon MISS_SCARLETT_card_icon = new ImageIcon(Character.class.getResource("img/MISS_SCARLETT_card.png"));
+		private static ImageIcon MISS_SCARLETT_card_large_icon = new ImageIcon(Character.class.getResource("img/MISS_SCARLETT_card_large.png"));
+		private static ImageIcon PROFESSOR_PLUM_room_icon = new ImageIcon(Character.class.getResource("img/PROFESSOR_PLUM_room.png"));
+		private static ImageIcon PROFESSOR_PLUM_floor_icon = new ImageIcon(Character.class.getResource("img/PROFESSOR_PLUM_floor.png"));
+		private static ImageIcon PROFESSOR_PLUM_card_icon = new ImageIcon(Character.class.getResource("img/PROFESSOR_PLUM_card.png"));
+		private static ImageIcon PROFESSOR_PLUM_card_large_icon = new ImageIcon(Character.class.getResource("img/PROFESSOR_PLUM_card_large.png"));
+		private static ImageIcon MRS_PEACOCK_room_icon = new ImageIcon(Character.class.getResource("img/MRS_PEACOCK_room.png"));
+		private static ImageIcon MRS_PEACOCK_floor_icon = new ImageIcon(Character.class.getResource("img/MRS_PEACOCK_floor.png"));
+		private static ImageIcon MRS_PEACOCK_card_icon = new ImageIcon(Character.class.getResource("img/MRS_PEACOCK_card.png"));
+		private static ImageIcon MRS_PEACOCK_card_large_icon = new ImageIcon(Character.class.getResource("img/MRS_PEACOCK_card_large.png"));
+		private static ImageIcon MRS_WHITE_room_icon = new ImageIcon(Character.class.getResource("img/MRS_WHITE_room.png"));
+		private static ImageIcon MRS_WHITE_floor_icon = new ImageIcon(Character.class.getResource("img/MRS_WHITE_floor.png"));
+		private static ImageIcon MRS_WHITE_card_icon = new ImageIcon(Character.class.getResource("img/MRS_WHITE_card.png"));
+		private static ImageIcon MRS_WHITE_card_large_icon = new ImageIcon(Character.class.getResource("img/MRS_WHITE_card_large.png"));
+		private static ImageIcon REVEREND_GREEN_room_icon = new ImageIcon(Character.class.getResource("img/REVEREND_GREEN_room.png"));
+		private static ImageIcon REVEREND_GREEN_floor_icon = new ImageIcon(Character.class.getResource("img/REVEREND_GREEN_floor.png"));
+		private static ImageIcon REVEREND_GREEN_card_icon = new ImageIcon(Character.class.getResource("img/REVEREND_GREEN_card.png"));
+		private static ImageIcon REVEREND_GREEN_card_large_icon = new ImageIcon(Character.class.getResource("img/REVEREND_GREEN_card_large.png"));
+		private static ImageIcon COLONEL_MUSTARD_room_icon = new ImageIcon(Character.class.getResource("img/COLONEL_MUSTARD_room.png"));
+		private static ImageIcon COLONEL_MUSTARD_floor_icon = new ImageIcon(Character.class.getResource("img/COLONEL_MUSTARD_floor.png"));
+		private static ImageIcon COLONEL_MUSTARD_card_icon = new ImageIcon(Character.class.getResource("img/COLONEL_MUSTARD_card.png"));
+		private static ImageIcon COLONEL_MUSTARD_card_large_icon = new ImageIcon(Character.class.getResource("img/COLONEL_MUSTARD_card_large.png"));
 		
 		private CharacterName(int startRow, int startCol) {
 			this.startRow = startRow;
@@ -72,6 +98,13 @@ public class Character implements GamePiece {
 			}
 			
 			return new String(name);
+		}
+
+		public ImageIcon icon(String mod) {
+			try {
+				return (ImageIcon) getClass().getDeclaredField(name()+mod+"_icon").get(this);
+			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {}
+			return null;
 		}
 	}
 	
@@ -208,5 +241,15 @@ public class Character implements GamePiece {
 	 */
 	public void setCol(int col) {
 		this.col = col;
+	}
+	
+	@Override
+	public String toString() {
+		return name.toString();
+	}
+
+	@Override
+	public ImageIcon icon(String mod) {
+		return name.icon(mod);
 	}
 }

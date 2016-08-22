@@ -1,9 +1,8 @@
 package cluedo.game;
 
-import java.awt.Point;
 import java.util.ArrayList;
 
-import cluedo.ui.UI;
+import javax.swing.ImageIcon;
 
 /**
  * Represents the rooms of a Cluedo game, and stores all
@@ -29,6 +28,35 @@ public class Room implements GamePiece {
 		LOUNGE,
 		STUDY;
 
+		// room images downloaded from http://happywithgame.com/wp-content/uploads/2015/08/clue-game-cards-rooms.jpg
+		private static ImageIcon KITCHEN_name_icon = new ImageIcon(Room.class.getResource("img/KITCHEN_name.png"));
+		private static ImageIcon KITCHEN_card_icon = new ImageIcon(Room.class.getResource("img/KITCHEN.png"));
+		private static ImageIcon KITCHEN_card_large_icon = new ImageIcon(Room.class.getResource("img/KITCHEN_large.png"));
+		private static ImageIcon BALLROOM_name_icon = new ImageIcon(Room.class.getResource("img/BALLROOM_name.png"));
+		private static ImageIcon BALLROOM_card_icon = new ImageIcon(Room.class.getResource("img/BALLROOM.png"));
+		private static ImageIcon BALLROOM_card_large_icon = new ImageIcon(Room.class.getResource("img/BALLROOM_large.png"));
+		private static ImageIcon CONSERVATORY_name_icon = new ImageIcon(Room.class.getResource("img/CONSERVATORY_name.png"));
+		private static ImageIcon CONSERVATORY_card_icon = new ImageIcon(Room.class.getResource("img/CONSERVATORY.png"));
+		private static ImageIcon CONSERVATORY_card_large_icon = new ImageIcon(Room.class.getResource("img/CONSERVATORY_large.png"));
+		private static ImageIcon BILLIARD_ROOM_name_icon = new ImageIcon(Room.class.getResource("img/BILLIARD_ROOM_name.png"));
+		private static ImageIcon BILLIARD_ROOM_card_icon = new ImageIcon(Room.class.getResource("img/BILLIARD_ROOM.png"));
+		private static ImageIcon BILLIARD_ROOM_card_large_icon = new ImageIcon(Room.class.getResource("img/BILLIARD_ROOM_large.png"));
+		private static ImageIcon DINING_ROOM_name_icon = new ImageIcon(Room.class.getResource("img/DINING_ROOM_name.png"));
+		private static ImageIcon DINING_ROOM_card_icon = new ImageIcon(Room.class.getResource("img/DINING_ROOM.png"));
+		private static ImageIcon DINING_ROOM_card_large_icon = new ImageIcon(Room.class.getResource("img/DINING_ROOM_large.png"));
+		private static ImageIcon LIBRARY_name_icon = new ImageIcon(Room.class.getResource("img/LIBRARY_name.png"));
+		private static ImageIcon LIBRARY_card_icon = new ImageIcon(Room.class.getResource("img/LIBRARY.png"));
+		private static ImageIcon LIBRARY_card_large_icon = new ImageIcon(Room.class.getResource("img/LIBRARY_large.png"));
+		private static ImageIcon HALL_name_icon = new ImageIcon(Room.class.getResource("img/HALL_name.png"));
+		private static ImageIcon HALL_card_icon = new ImageIcon(Room.class.getResource("img/HALL.png"));
+		private static ImageIcon HALL_card_large_icon = new ImageIcon(Room.class.getResource("img/HALL_large.png"));
+		private static ImageIcon LOUNGE_name_icon = new ImageIcon(Room.class.getResource("img/LOUNGE_name.png"));
+		private static ImageIcon LOUNGE_card_icon = new ImageIcon(Room.class.getResource("img/LOUNGE.png"));
+		private static ImageIcon LOUNGE_card_large_icon = new ImageIcon(Room.class.getResource("img/LOUNGE_large.png"));
+		private static ImageIcon STUDY_name_icon = new ImageIcon(Room.class.getResource("img/STUDY_name.png"));
+		private static ImageIcon STUDY_card_icon = new ImageIcon(Room.class.getResource("img/STUDY.png"));
+		private static ImageIcon STUDY_card_large_icon = new ImageIcon(Room.class.getResource("img/STUDY_large.png"));
+		
 		/**
 		 * Returns a human-friendly version of the name of this RoomName.
 		 * That is, all underscores are replaced with spaces and words are
@@ -54,6 +82,13 @@ public class Room implements GamePiece {
 			
 			return new String(name);
 		}
+
+		public ImageIcon icon(String mod) {
+			try {
+				return (ImageIcon) getClass().getDeclaredField(name()+mod+"_icon").get(this);
+			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {}
+			return null;
+		}
 	}
 	
 	private RoomName name;
@@ -61,6 +96,7 @@ public class Room implements GamePiece {
 	private ArrayList<Weapon> weapons;
 	private Room connection;
 	
+	private int nameRow, nameWidth;
 	private int row, col;
 	private int charRow, charCol;
 	private int wepRow, wepCol;
@@ -86,6 +122,10 @@ public class Room implements GamePiece {
 	 * @return	reader-friendly name
 	 */
 	public String name() {
+		return name.toString();
+	}
+	
+	public String toString() {
 		return name.toString();
 	}
 	
@@ -267,55 +307,47 @@ public class Room implements GamePiece {
 		}
 		return false;
 	}
-
-	/**
-	 * Returns a single Point at which the current player will emerge from
-	 * this room. If multiple exits are available in the same Direction,
-	 * asks the user which they would prefer.
-	 * 
-	 * @param d			the Direction the user wants to leave in
-	 * @param board		the Board that contains this Room
-	 * @return			a Point representing the co-ordinates that the Player wants to exit to
-	 */
-	public Point getExitPoint(Board.Direction d, Board board) {
-		ArrayList<Point> exits = new ArrayList<Point>();
-		switch (d) {
-		case UP:
-			for (int i = 0; i < layout[0].length; i++)
-				if (layout[0][i] == UP)
-					exits.add(new Point(row - 1, col + i));
-			break;
-		case RIGHT:
-			for (int i = 0; i < layout.length; i++)
-				if (layout[i][layout[i].length-1] == RIGHT)
-					exits.add(new Point(row + i, col + layout[i].length));
-			break;
-		case DOWN:
-			for (int i = 0; i < layout[layout.length-1].length; i++)
-				if (layout[layout.length-1][i] == DOWN)
-					exits.add(new Point(row + layout.length, col + i));
-			break;
-		case LEFT:
-			for (int i = 0; i < layout.length; i++)
-				if (layout[i][0] == LEFT)
-					exits.add(new Point(row + i, col - 1));
-		}
-		
-		if (exits.size() > 1) {
-			String question = "There are multiple exits in this direction.\nWhich exit would you like to use?";
-			String[] options = new String[exits.size()];
-			for (int i = 0; i < exits.size(); i++) {
-				options[i] = "Row "+exits.get(i).getX()+", Column "+exits.get(i).getY();
+	
+	public boolean exitToPoint(Character c, int row, int col) {
+		if (characters.contains(c)) {
+			// square would be one *outside* of the layout array
+			
+			if (col-this.col >= 0 && col-this.col < layout[0].length) {
+				// col is within bounds
+				if (row-this.row == -1) {
+					// trying to go up
+					if (layout[row-this.row+1][col-this.col] == UP) {
+						return true;
+					}
+				} else if (row-this.row == layout.length) {
+					// trying to go down
+					if (layout[row-this.row-1][col-this.col] == DOWN) {
+						return true;
+					}
+				} else if (row-this.row == layout.length - 1) {
+					// trying to go down (special case for Conservatory)
+					if (layout[row-this.row-1][col-this.col] == DOWN) {
+						return true;
+					}
+				}
+			} else if (row-this.row >= 0 && row-this.row < layout.length) {
+				System.out.println("horizontal");
+				// row is within bounds
+				if (col-this.col == -1) {
+					// trying to go left
+					if (layout[row-this.row][col-this.col+1] == LEFT) {
+						return true;
+					}
+				} else if (col-this.col == layout[0].length) {
+					// trying to go right
+					if (layout[row-this.row][col-this.col-1] == RIGHT) {
+						return true;
+					}
+				}
 			}
-			
-			int ans = board.askOpt(question, options);
-			
-			return exits.get(ans-1);
-		} else if (exits.size() == 1) {
-			return exits.get(0);
 		}
 		
-		return null;	// there are no exit points in this direction
+		return false;
 	}
 	
 	/**
@@ -370,9 +402,44 @@ public class Room implements GamePiece {
 		return ' ';
 	}
 	
+	public ImageIcon getIcon(int row, int col) {
+		if (row == nameRow) {
+			return name.icon("_name");
+		} else if (layout[row-this.row][col-this.col] >= 10) {
+			int door = layout[row-this.row][col-this.col];
+			switch (door) {
+			case UP:
+				return door_up;
+			case RIGHT:
+				return door_right;
+			case DOWN:
+				return door_down;
+			case LEFT:
+				return door_left;
+			}
+		} else if (row == charRow) {
+			int actual = col-charCol;	// translate from board ordinate
+			if (actual >= 0 && actual < characters.size()) {
+				return characters.get(actual).icon("_room");
+			}
+		} else if (row == wepRow) {
+			int actual = col-wepCol;
+			if (actual >= 0 && actual < weapons.size()) {
+				return weapons.get(actual).icon("");
+			}
+		}
+		return null;
+	}
+	
+	public int getNameWidth() {
+		return nameWidth;
+	}
+	
 	
 	private void assignFields() {
 		if (name.equals(RoomName.BALLROOM)) {
+			nameRow = ballroomNameRow;
+			nameWidth = ballroomNameWidth;
 			row = ballroomRow;
 			col = ballroomCol;
 			charRow = ballroomCharRow;
@@ -381,6 +448,8 @@ public class Room implements GamePiece {
 			wepCol = ballroomWepCol;
 			layout = ballroom;
 		} else if (name.equals(RoomName.BILLIARD_ROOM)) {
+			nameRow = billiardNameRow;
+			nameWidth = billiardNameWidth;
 			row = billiardRow;
 			col = billiardCol;
 			charRow = billiardCharRow;
@@ -389,6 +458,8 @@ public class Room implements GamePiece {
 			wepCol = billiardWepCol;
 			layout = billiard;
 		} else if (name.equals(RoomName.CONSERVATORY)) {
+			nameRow = conservatoryNameRow;
+			nameWidth = conservatoryNameWidth;
 			row = conservatoryRow;
 			col = conservatoryCol;
 			charRow = conservatoryCharRow;
@@ -397,6 +468,8 @@ public class Room implements GamePiece {
 			wepCol = conservatoryWepCol;
 			layout = conservatory;
 		} else if (name.equals(RoomName.DINING_ROOM)) {
+			nameRow = diningNameRow;
+			nameWidth = diningNameWidth;
 			row = diningRow;
 			col = diningCol;
 			charRow = diningCharRow;
@@ -405,6 +478,8 @@ public class Room implements GamePiece {
 			wepCol = diningWepCol;
 			layout = dining;
 		} else if (name.equals(RoomName.HALL)) {
+			nameRow = hallNameRow;
+			nameWidth = hallNameWidth;
 			row = hallRow;
 			col = hallCol;
 			charRow = hallCharRow;
@@ -413,6 +488,8 @@ public class Room implements GamePiece {
 			wepCol = hallWepCol;
 			layout = hall;
 		} else if (name.equals(RoomName.KITCHEN)) {
+			nameRow = kitchenNameRow;
+			nameWidth = kitchenNameWidth;
 			row = kitchenRow;
 			col = kitchenCol;
 			charRow = kitchenCharRow;
@@ -421,6 +498,8 @@ public class Room implements GamePiece {
 			wepCol = kitchenWepCol;
 			layout = kitchen;
 		} else if (name.equals(RoomName.LIBRARY)) {
+			nameRow = libraryNameRow;
+			nameWidth = libraryNameWidth;
 			row = libraryRow;
 			col = libraryCol;
 			charRow = libraryCharRow;
@@ -429,6 +508,8 @@ public class Room implements GamePiece {
 			wepCol = libraryWepCol;
 			layout = library;
 		} else if (name.equals(RoomName.LOUNGE)) {
+			nameRow = loungeNameRow;
+			nameWidth = loungeNameWidth;
 			row = loungeRow;
 			col = loungeCol;
 			charRow = loungeCharRow;
@@ -437,6 +518,8 @@ public class Room implements GamePiece {
 			wepCol = loungeWepCol;
 			layout = lounge;
 		} else if (name.equals(RoomName.STUDY)) {
+			nameRow = studyNameRow;
+			nameWidth = studyNameWidth;
 			row = studyRow;
 			col = studyCol;
 			charRow = studyCharRow;
@@ -446,6 +529,11 @@ public class Room implements GamePiece {
 			layout = study;
 		}
 	}
+
+	private static ImageIcon door_up = new ImageIcon(Room.class.getResource("img/room_door_up.png"));
+	private static ImageIcon door_right = new ImageIcon(Room.class.getResource("img/room_door_right.png"));
+	private static ImageIcon door_down = new ImageIcon(Room.class.getResource("img/room_door_down.png"));
+	private static ImageIcon door_left = new ImageIcon(Room.class.getResource("img/room_door_left.png"));
 	
 	// Room coordinates and layouts
 	//==============================
@@ -464,9 +552,10 @@ public class Room implements GamePiece {
 	
 	// Kitchen coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int kitchenNameRow = 3, kitchenNameWidth = 6;
 	private static final int kitchenRow = 2, kitchenCol = 0;
-	private static final int kitchenCharRow = 5, kitchenCharCol = 4;
-	private static final int kitchenWepRow = 6, kitchenWepCol = 4;
+	private static final int kitchenCharRow = 5, kitchenCharCol = 0;
+	private static final int kitchenWepRow = 6, kitchenWepCol = 0;
 	private static final int[][] kitchen = {
 			{1, 1, 1, 1, 1, 2},
 			{1, 1, 1, 1, 1, 1},
@@ -478,9 +567,10 @@ public class Room implements GamePiece {
 	
 	// Ballroom coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int ballroomNameRow = 4, ballroomNameWidth = 8;
 	private static final int ballroomRow = 2, ballroomCol = 8;
-	private static final int ballroomCharRow = 6, ballroomCharCol = 23;
-	private static final int ballroomWepRow = 7, ballroomWepCol = 23;
+	private static final int ballroomCharRow = 6, ballroomCharCol = 10;
+	private static final int ballroomWepRow = 7, ballroomWepCol = 10;
 	private static final int[][] ballroom = {
 			{0, 0, 1, 1, 1, 1, 0, 0},
 			{1, 1, 1, 1, 1, 1, 1, 1},
@@ -493,9 +583,10 @@ public class Room implements GamePiece {
 	
 	// Conservatory coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int conservatoryNameRow = 2, conservatoryNameWidth = 6;
 	private static final int conservatoryRow = 2, conservatoryCol = 18;
-	private static final int conservatoryCharRow = 4, conservatoryCharCol = 41;
-	private static final int conservatoryWepRow = 5, conservatoryWepCol = 41;
+	private static final int conservatoryCharRow = 3, conservatoryCharCol = 18;
+	private static final int conservatoryWepRow = 4, conservatoryWepCol = 18;
 	private static final int[][] conservatory = {
 			{1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1},
@@ -506,9 +597,10 @@ public class Room implements GamePiece {
 	
 	// Billiard room coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int billiardNameRow = 9, billiardNameWidth = 6;
 	private static final int billiardRow = 9, billiardCol = 18;
-	private static final int billiardCharRow = 11, billiardCharCol = 41;
-	private static final int billiardWepRow = 12, billiardWepCol = 41;
+	private static final int billiardCharRow = 11, billiardCharCol = 18;
+	private static final int billiardWepRow = 12, billiardWepCol = 18;
 	private static final int[][] billiard = {
 			{1, 1, 1, 1, 1, 1},
 			{LEFT, 1, 1, 1, 1, 1},
@@ -519,9 +611,10 @@ public class Room implements GamePiece {
 	
 	// Dining room coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int diningNameRow = 12, diningNameWidth = 8;
 	private static final int diningRow = 10, diningCol = 0;
-	private static final int diningCharRow = 14, diningCharCol = 5;
-	private static final int diningWepRow = 15, diningWepCol = 5;
+	private static final int diningCharRow = 14, diningCharCol = 1;
+	private static final int diningWepRow = 15, diningWepCol = 1;
 	private static final int[][] dining = {
 			{1, 1, 1, 1, 1, 0, 0, 0},
 			{1, 1, 1, 1, 1, 1, 1, 1},
@@ -534,9 +627,10 @@ public class Room implements GamePiece {
 	
 	// Library coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int libraryNameRow = 16, libraryNameWidth = 7;
 	private static final int libraryRow = 15, libraryCol = 17;
-	private static final int libraryCharRow = 17, libraryCharCol = 39;
-	private static final int libraryWepRow = 18, libraryWepCol = 39;
+	private static final int libraryCharRow = 17, libraryCharCol = 18;
+	private static final int libraryWepRow = 18, libraryWepCol = 18;
 	private static final int[][] library = {
 			{0, 1, 1, UP, 1, 1, 0},
 			{1, 1, 1, 1, 1, 1, 1},
@@ -547,9 +641,10 @@ public class Room implements GamePiece {
 	
 	// Hall coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int hallNameRow = 20, hallNameWidth = 6;
 	private static final int hallRow = 19, hallCol = 9;
-	private static final int hallCharRow = 22, hallCharCol = 21;
-	private static final int hallWepRow = 24, hallWepCol = 21; 
+	private static final int hallCharRow = 22, hallCharCol = 10;
+	private static final int hallWepRow = 24, hallWepCol = 10; 
 	private static final int[][] hall = {
 			{1, 1, UP, UP, 1, 1},
 			{1, 1, 1, 1, 1, 1},
@@ -562,9 +657,10 @@ public class Room implements GamePiece {
 	
 	// Lounge coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int loungeNameRow = 21, loungeNameWidth = 7;
 	private static final int loungeRow = 20, loungeCol = 0;
-	private static final int loungeCharRow = 23, loungeCharCol = 4;
-	private static final int loungeWepRow = 24, loungeWepCol = 4;
+	private static final int loungeCharRow = 23, loungeCharCol = 0;
+	private static final int loungeWepRow = 24, loungeWepCol = 0;
 	private static final int[][] lounge = {
 			{1, 1, 1, 1, 1, 1, UP},
 			{1, 1, 1, 1, 1, 1, 1},
@@ -576,13 +672,18 @@ public class Room implements GamePiece {
 	
 	// Study coordinates on the map and floor layout,
 	// and character list starting coordinates
+	private static final int studyNameRow = 23, studyNameWidth = 7;
 	private static final int studyRow = 22, studyCol = 17;
-	private static final int studyCharRow = 23, studyCharCol = 39;
-	private static final int studyWepRow = 24, studyWepCol = 39;
+	private static final int studyCharRow = 24, studyCharCol = 18;
+	private static final int studyWepRow = 25, studyWepCol = 18;
 	private static final int[][] study = {
 			{UP, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1},
 			{1, 1, 1, 1, 1, 1, 1},
 			{0, 1, 1, 1, 1, 1, 1}
 	};
+	
+	public ImageIcon icon(String mod) {
+		return name.icon(mod);
+	}
 }

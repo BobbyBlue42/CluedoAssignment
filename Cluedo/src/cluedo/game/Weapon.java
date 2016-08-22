@@ -1,5 +1,7 @@
 package cluedo.game;
 
+import javax.swing.ImageIcon;
+
 /**
  * Represents the weapons of a Cluedo game, and stores all
  * information which is necessary to do so.
@@ -20,6 +22,26 @@ public class Weapon implements GamePiece {
 		REVOLVER('G'),
 		ROPE('R'),
 		SPANNER('S');
+
+		// weapon images downloaded from https://nz.pinterest.com/pin/409898003558947968/
+		private static ImageIcon CANDLESTICK_icon = new ImageIcon(Weapon.class.getResource("img/CANDLESTICK.png"));
+		private static ImageIcon CANDLESTICK_card_icon = new ImageIcon(Weapon.class.getResource("img/CANDLESTICK_card.png"));
+		private static ImageIcon CANDLESTICK_card_large_icon = new ImageIcon(Weapon.class.getResource("img/CANDLESTICK_card_large.png"));
+		private static ImageIcon DAGGER_icon = new ImageIcon(Weapon.class.getResource("img/DAGGER.png"));
+		private static ImageIcon DAGGER_card_icon = new ImageIcon(Weapon.class.getResource("img/DAGGER_card.png"));
+		private static ImageIcon DAGGER_card_large_icon = new ImageIcon(Weapon.class.getResource("img/DAGGER_card_large.png"));
+		private static ImageIcon LEAD_PIPE_icon = new ImageIcon(Weapon.class.getResource("img/LEAD_PIPE.png"));
+		private static ImageIcon LEAD_PIPE_card_icon = new ImageIcon(Weapon.class.getResource("img/LEAD_PIPE_card.png"));
+		private static ImageIcon LEAD_PIPE_card_large_icon = new ImageIcon(Weapon.class.getResource("img/LEAD_PIPE_card_large.png"));
+		private static ImageIcon REVOLVER_icon = new ImageIcon(Weapon.class.getResource("img/REVOLVER.png"));
+		private static ImageIcon REVOLVER_card_icon = new ImageIcon(Weapon.class.getResource("img/REVOLVER_card.png"));
+		private static ImageIcon REVOLVER_card_large_icon = new ImageIcon(Weapon.class.getResource("img/REVOLVER_card_large.png"));
+		private static ImageIcon ROPE_icon = new ImageIcon(Weapon.class.getResource("img/ROPE.png"));
+		private static ImageIcon ROPE_card_icon = new ImageIcon(Weapon.class.getResource("img/ROPE_card.png"));
+		private static ImageIcon ROPE_card_large_icon = new ImageIcon(Weapon.class.getResource("img/ROPE_card_large.png"));
+		private static ImageIcon SPANNER_icon = new ImageIcon(Weapon.class.getResource("img/SPANNER.png"));
+		private static ImageIcon SPANNER_card_icon = new ImageIcon(Weapon.class.getResource("img/SPANNER_card.png"));
+		private static ImageIcon SPANNER_card_large_icon = new ImageIcon(Weapon.class.getResource("img/SPANNER_card_large.png"));
 		
 		private char c;
 		
@@ -62,6 +84,13 @@ public class Weapon implements GamePiece {
 			
 			return new String(name);
 		}
+
+		public ImageIcon icon(String mod) {
+			try {
+				return (ImageIcon) getClass().getDeclaredField(name()+mod+"_icon").get(this);
+			} catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {}
+			return null;
+		}
 	}
 	
 	private WeaponName name;
@@ -85,6 +114,10 @@ public class Weapon implements GamePiece {
 	 * @return	reader-friendly name
 	 */
 	public String name() {
+		return name.toString();
+	}
+	
+	public String toString() {
 		return name.toString();
 	}
 
@@ -122,5 +155,9 @@ public class Weapon implements GamePiece {
 	 */
 	public void moveToRoom(Room r) {
 		location = r;
+	}
+	
+	public ImageIcon icon(String mod) {
+		return name.icon(mod);
 	}
 }

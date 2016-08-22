@@ -1,6 +1,6 @@
 package cluedo.game;
 
-import java.lang.Character;
+import javax.swing.ImageIcon;
 
 /**
  * Represents all cards in the Cluedo game, and stores
@@ -51,5 +51,9 @@ public class Card {
 	 */
 	public boolean isMurderComponent() {
 		return isMurderComponent;
+	}
+	
+	public ImageIcon icon(String mod) {
+		return piece.icon("_card"+mod);
 	}
 }
